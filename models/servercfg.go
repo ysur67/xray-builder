@@ -73,7 +73,7 @@ type PolicyObject struct {
 	} `json:"levels"`
 }
 
-type Config struct {
+type ServerConfig struct {
 	Log       LogObject     `json:"log"`
 	Routing   RoutingObject `json:"routing"`
 	OutBounds []Outbound    `json:"outbounds"`
