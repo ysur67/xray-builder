@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
+	"xraybuilder/models"
+	"xraybuilder/service/keypair"
 )
 
 const ShellToUse = "bash"
@@ -19,13 +20,22 @@ func Shellout(command string) (string, string, error) {
 	return stdout.String(), stderr.String(), err
 }
 
-func main() {
-	out, errout, err := Shellout("bash -c \"$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)\" @ install -u root --version 1.8.0")
+func GenerateKeyPair() (*models.KeyPair, error) {
+	out, _, err := Shellout("xray x25519")
 	if err != nil {
-		log.Printf("error: %v\n", err)
+		return nil, err
 	}
-	fmt.Println("--- stdout ---")
-	fmt.Println(out)
-	fmt.Println("--- stderr ---")
-	fmt.Println(errout)
+	keyPair, err := keypair.FromStdOut(out)
+	if err != nil {
+		return nil, err
+	}
+	return keyPair, nil
+}
+
+func main() {
+	pair, err := GenerateKeyPair()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(pair)
 }
