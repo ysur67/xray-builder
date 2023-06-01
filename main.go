@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"xraybuilder/models"
 	"xraybuilder/service/keypair"
@@ -32,10 +34,30 @@ func GenerateKeyPair() (*models.KeyPair, error) {
 	return keyPair, nil
 }
 
+func ReadConfig(path string) (*models.Config, error) {
+	if path == "" {
+		path = "config.template.json"
+	}
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	config := models.Config{}
+	err = json.Unmarshal([]byte(file), &config)
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
 func main() {
-	pair, err := GenerateKeyPair()
+	_, err := GenerateKeyPair()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(pair)
+	config, err := ReadConfig("")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(config)
 }
