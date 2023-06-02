@@ -56,9 +56,8 @@ type Inbound struct {
 }
 
 type RoutingObject struct {
-	DomainStrategy string    `json:"domainStrategy"`
-	Rules          []Rule    `json:"rules"`
-	Inbounds       []Inbound `json:"inbounds"`
+	DomainStrategy string `json:"domainStrategy"`
+	Rules          []Rule `json:"rules"`
 }
 
 type Outbound struct {
@@ -80,6 +79,7 @@ type ServerConfig struct {
 	Routing   RoutingObject `json:"routing"`
 	OutBounds []Outbound    `json:"outbounds"`
 	Policy    PolicyObject  `json:"policy"`
+	Inbounds  []Inbound     `json:"inbounds"`
 }
 
 type ClientDto struct {

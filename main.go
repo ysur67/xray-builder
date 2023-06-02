@@ -10,6 +10,7 @@ import (
 	"xraybuilder/internal"
 	"xraybuilder/models"
 	"xraybuilder/service/serverclients"
+	"xraybuilder/service/serverconfig"
 )
 
 func main() {
@@ -42,11 +43,23 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = ReadServerConfig("")
+	cfg, err := ReadServerConfig("")
 	if err != nil {
 		panic(err)
 	}
-
+	_, err = internal.GenerateKeyPair()
+	if err != nil {
+		panic(err)
+	}
+	clients, err := serverclients.CreateClients(args.ClientCount)
+	if err != nil {
+		panic(err)
+	}
+	serverconfig.AppendClients(
+		cfg,
+		clients,
+		&cfg.Inbounds[0].StreamSettings,
+	)
 }
 
 func AddClients() {
