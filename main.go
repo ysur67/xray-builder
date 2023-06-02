@@ -1,41 +1,61 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"io/ioutil"
-	"os/exec"
+	"os"
+	"strings"
+	"xraybuilder/internal"
 	"xraybuilder/models"
-	"xraybuilder/service/keypair"
+	"xraybuilder/service/serverclients"
 )
 
-const ShellToUse = "bash"
+func main() {
+	mode := os.Args[0]
+	if mode == "" {
+		fmt.Println("Select mode: install, add")
+		return
+	}
+	mode = strings.ToLower(mode)
+	if mode == "install" {
+		RunInstall()
+		return
+	}
+	if mode == "add" {
+		AddClients()
+		return
+	}
 
-func Shellout(command string) (string, string, error) {
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd := exec.Command(ShellToUse, "-c", command)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return stdout.String(), stderr.String(), err
 }
 
-func GenerateKeyPair() (*models.KeyPair, error) {
-	out, _, err := Shellout("xray x25519")
-	if err != nil {
-		return nil, err
+func RunInstall() {
+	args := ReadCreateArgs()
+	if args.DownloadXray {
+		err := internal.DownloadAndInstallXray(args)
+		if err != nil {
+			panic(err)
+		}
 	}
-	keyPair, err := keypair.FromStdOut(out)
+	_, err := serverclients.CreateClients(args.ClientCount)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return keyPair, nil
+	_, err = ReadServerConfig("")
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func AddClients() {
+
 }
 
 func ReadServerConfig(path string) (*models.ServerConfig, error) {
 	if path == "" {
-		path = "configs/server.template.json"
+		path = "server.template.json"
 	}
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -49,19 +69,15 @@ func ReadServerConfig(path string) (*models.ServerConfig, error) {
 	return &config, nil
 }
 
-func ReadArgs() *models.CliArgs {
-	return &models.CliArgs{}
-}
-
-func main() {
-	_, err := GenerateKeyPair()
-	if err != nil {
-		panic(err)
+func ReadCreateArgs() *models.InstallArgs {
+	clients := flag.Int("n", 3, "Amount of clients to create")
+	redirectAddress := flag.String("redir", "https://google.com", "Shadow address")
+	downloadXray := flag.Bool("preload", false, "Preload Xray")
+	xrayVersion := flag.String("version", "1.8.0", "Xray version, 1.8.0 default")
+	return &models.InstallArgs{
+		ClientCount:  *clients,
+		RedirectAddr: *redirectAddress,
+		DownloadXray: *downloadXray,
+		XrayVersion:  *xrayVersion,
 	}
-	_, err = ReadServerConfig("")
-	if err != nil {
-		panic(err)
-	}
-	args := ReadArgs()
-	// args.
 }

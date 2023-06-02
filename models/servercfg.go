@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 type LogObject struct {
 	LogLevel string `json:"logLevel"`
 }
@@ -78,4 +80,19 @@ type ServerConfig struct {
 	Routing   RoutingObject `json:"routing"`
 	OutBounds []Outbound    `json:"outbounds"`
 	Policy    PolicyObject  `json:"policy"`
+}
+
+type ClientDto struct {
+	Client  Client
+	ShortId string
+}
+
+func NewClient(shortId string) *ClientDto {
+	return &ClientDto{
+		Client: Client{
+			ID:   uuid.New().String(),
+			Flow: "xtls-rprx-vision",
+		},
+		ShortId: shortId,
+	}
 }
