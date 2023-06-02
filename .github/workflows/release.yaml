@@ -8,10 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1
+    - uses: goreleaser/goreleaser-action@v4
       with:
         version: latest
         binary_name: "xraybuilder"
         github_token: ${{ secrets.GO_RELEASE_GITHUB_TOKEN }}
         goos: linux
         goarch: amd64
+        args: release --clean
