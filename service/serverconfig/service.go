@@ -10,11 +10,14 @@ func AppendClients(
 	streamSettings *models.StreamSettingsObject,
 ) {
 	serverClients := make([]models.Client, len(*clients))
+	shortIds := make([]string, len(*clients))
 	for ind, elem := range *clients {
 		serverClients[ind] = elem.Client
+		shortIds[ind] = elem.ShortId
 	}
 	first := serverConfig.FirstInbound()
-	first.Settings.Clients = serverClients
+	first.Settings.Clients = append(first.Settings.Clients, serverClients...)
+	first.StreamSettings.RealitySettings.ShortIds = append(first.StreamSettings.RealitySettings.ShortIds, shortIds...)
 }
 
 func SetPrivateKey(
