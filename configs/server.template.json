@@ -27,12 +27,7 @@
             "port": 443,
             "protocol": "vless",
             "settings": {
-                "clients": [
-                    {
-                        "id": "9f2b4b10-6818-492e-a157-d5131d450c7b",
-                        "flow": "xtls-rprx-vision"
-                    }
-                ],
+                "clients": [],
                 "decryption": "none"
             },
             "streamSettings": {
@@ -40,18 +35,14 @@
                 "security": "reality",
                 "realitySettings": {
                     "show": false,
-                    "dest": "www.microsoft.com:443",
+                    "dest": "",
                     "xver": 0,
-                    "serverNames": [
-                        "www.microsoft.com"
-                    ],
+                    "serverNames": [],
                     "privateKey": "ass",
                     "minClientVer": "",
                     "maxClientVer": "",
                     "maxTimeDiff": 0,
-                    "shortIds": [
-                        "b1"
-                    ]
+                    "shortIds": []
                 }
             },
             "sniffing": {
