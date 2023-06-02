@@ -50,6 +50,15 @@ func TestSetPrivateKey(t *testing.T) {
 	}
 	SetPrivateKey(config, &keyPair)
 	if config.Inbounds[0].StreamSettings.RealitySettings.PrivateKey != keyPair.Private {
-		t.Error("Expected private key to be set, got invalid instead")
+		t.Error("Expected private key to be set, got invalid value instead")
+	}
+}
+
+func TestSetDestinationAddress(t *testing.T) {
+	config := config()
+	addr := "https://rkn.gov.ru/"
+	SetDestinationAddress(config, addr)
+	if config.Inbounds[0].StreamSettings.RealitySettings.Dest != addr+":443" {
+		t.Error("Expected dest to be set, got value invalid instead")
 	}
 }

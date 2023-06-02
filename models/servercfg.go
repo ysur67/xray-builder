@@ -82,6 +82,10 @@ type ServerConfig struct {
 	Inbounds  []Inbound     `json:"inbounds"`
 }
 
+func (s *ServerConfig) FirstInbound() *Inbound {
+	return &s.Inbounds[0]
+}
+
 type ClientDto struct {
 	Client  Client
 	ShortId string

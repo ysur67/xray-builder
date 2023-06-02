@@ -13,7 +13,7 @@ func AppendClients(
 	for ind, elem := range *clients {
 		serverClients[ind] = elem.Client
 	}
-	first := &serverConfig.Inbounds[0]
+	first := serverConfig.FirstInbound()
 	first.Settings.Clients = serverClients
 }
 
@@ -21,5 +21,9 @@ func SetPrivateKey(
 	serverConfig *models.ServerConfig,
 	keyPair *models.KeyPair,
 ) {
-	serverConfig.Inbounds[0].StreamSettings.RealitySettings.PrivateKey = keyPair.Private
+	serverConfig.FirstInbound().StreamSettings.RealitySettings.PrivateKey = keyPair.Private
+}
+
+func SetDestinationAddress(serverConfig *models.ServerConfig, addr string) {
+	serverConfig.FirstInbound().StreamSettings.RealitySettings.Dest = addr + ":443"
 }

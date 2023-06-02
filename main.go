@@ -58,9 +58,10 @@ func RunInstall() {
 	serverconfig.AppendClients(
 		cfg,
 		clients,
-		&cfg.Inbounds[0].StreamSettings,
+		&cfg.FirstInbound().StreamSettings,
 	)
 	serverconfig.SetPrivateKey(cfg, keyPair)
+	serverconfig.SetDestinationAddress(cfg, args.RedirectAddr)
 }
 
 func AddClients() {
