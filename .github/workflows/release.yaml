@@ -12,7 +12,8 @@ jobs:
       with:
         version: latest
         binary_name: "xraybuilder"
-        github_token: ${{ secrets.GO_RELEASE_GITHUB_TOKEN }}
         goos: linux
         goarch: amd64
         args: release --clean
+      env:
+        GITHUB_TOKEN: ${{ secrets.GO_RELEASE_GITHUB_TOKEN }}
