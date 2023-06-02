@@ -39,6 +39,7 @@ func CreateClientConfig(
 			},
 		},
 	}
+	first.StreamSettings.RealitySettings.ShortID = client.ShortId
 	first.StreamSettings.RealitySettings.ServerName = cfg.FirstInbound().StreamSettings.RealitySettings.ServerNames[0]
 	first.StreamSettings.RealitySettings.PublicKey = keyPair.Pub
 	return &clientConfig

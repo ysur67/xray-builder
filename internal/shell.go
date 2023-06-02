@@ -48,6 +48,6 @@ func GetServerAddr() (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	out = strings.TrimSuffix(out, "\n")
+	out = strings.Split(out, " ")[0]
 	return &out, nil
 }

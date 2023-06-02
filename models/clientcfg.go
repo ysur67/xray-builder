@@ -25,7 +25,7 @@ type ClientVnext struct {
 }
 
 type ClientOutboundSettings struct {
-	Vnext ClientVnext
+	Vnext ClientVnext `json:"vnext"`
 }
 
 type ClientRealitySettings struct {
