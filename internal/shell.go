@@ -33,8 +33,8 @@ func GenerateKeyPair() (*models.KeyPair, error) {
 	return keyPair, nil
 }
 
-func DownloadAndInstallXray(config *models.InstallArgs) error {
-	cmd := fmt.Sprintf(`bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u root --version %s`, config.XrayVersion)
+func DownloadAndInstallXray(version string) error {
+	cmd := fmt.Sprintf(`bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u root --version %s`, version)
 	out, _, err := Shellout(cmd)
 	if err != nil {
 		return err
