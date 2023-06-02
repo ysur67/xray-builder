@@ -41,3 +41,15 @@ func TestAppend(t *testing.T) {
 		t.Errorf("Expected %v clients found %v", len(clients), len(config.Inbounds[0].Settings.Clients))
 	}
 }
+
+func TestSetPrivateKey(t *testing.T) {
+	config := config()
+	keyPair := models.KeyPair{
+		Pub:     "pub",
+		Private: "private",
+	}
+	SetPrivateKey(config, &keyPair)
+	if config.Inbounds[0].StreamSettings.RealitySettings.PrivateKey != keyPair.Private {
+		t.Error("Expected private key to be set, got invalid instead")
+	}
+}

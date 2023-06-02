@@ -16,3 +16,10 @@ func AppendClients(
 	first := &serverConfig.Inbounds[0]
 	first.Settings.Clients = serverClients
 }
+
+func SetPrivateKey(
+	serverConfig *models.ServerConfig,
+	keyPair *models.KeyPair,
+) {
+	serverConfig.Inbounds[0].StreamSettings.RealitySettings.PrivateKey = keyPair.Private
+}

@@ -47,7 +47,7 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = internal.GenerateKeyPair()
+	keyPair, err := internal.GenerateKeyPair()
 	if err != nil {
 		panic(err)
 	}
@@ -60,6 +60,7 @@ func RunInstall() {
 		clients,
 		&cfg.Inbounds[0].StreamSettings,
 	)
+	serverconfig.SetPrivateKey(cfg, keyPair)
 }
 
 func AddClients() {
