@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 	"xraybuilder/models"
 	"xraybuilder/service/keypair"
 )
@@ -40,4 +41,13 @@ func DownloadAndInstallXray(config *models.InstallArgs) error {
 	}
 	fmt.Println(out)
 	return nil
+}
+
+func GetServerAddr() (*string, error) {
+	out, _, err := Shellout("hostname -I")
+	if err != nil {
+		return nil, err
+	}
+	out = strings.TrimSuffix(out, "\n")
+	return &out, nil
 }

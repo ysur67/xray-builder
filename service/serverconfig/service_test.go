@@ -1,18 +1,15 @@
 package serverconfig
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"testing"
 	"xraybuilder/internal"
 	"xraybuilder/models"
 )
 
 func config() *models.ServerConfig {
-	file, _ := ioutil.ReadFile(internal.RootDir() + "/configs/server.template.json")
-	cfg := models.ServerConfig{}
-	json.Unmarshal([]byte(file), &cfg)
-	return &cfg
+	result := models.ServerConfig{}
+	internal.ReadJson(internal.RootDir()+"/configs/server.template.json", &result)
+	return &result
 }
 
 func TestEmptyAppend(t *testing.T) {

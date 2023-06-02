@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"xraybuilder/internal"
@@ -16,8 +14,10 @@ import (
 func main() {
 	mode := os.Args[0]
 	if mode == "" {
-		fmt.Println("Select mode: install, add")
+		RunInstall()
 		return
+		// fmt.Println("Select mode: install, add")
+		// return
 	}
 	mode = strings.ToLower(mode)
 	if mode == "install" {
@@ -28,6 +28,8 @@ func main() {
 		AddClients()
 		return
 	}
+	RunInstall()
+	return
 
 }
 
@@ -55,6 +57,19 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
+	InflateServerConfig(cfg, clients, keyPair, args)
+	clientConfigs := CreateClientConfigs(cfg, clients, keyPair, args)
+	internal.WriteToFile("config.json", &cfg)
+	for ind, elem := range *clientConfigs {
+		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
+	}
+}
+
+func InflateServerConfig(
+	cfg *models.ServerConfig,
+	clients *[]models.ClientDto,
+	keyPair *models.KeyPair, args *models.InstallArgs,
+) {
 	serverconfig.AppendClients(
 		cfg,
 		clients,
@@ -62,6 +77,20 @@ func RunInstall() {
 	)
 	serverconfig.SetPrivateKey(cfg, keyPair)
 	serverconfig.SetDestinationAddress(cfg, args.RedirectAddr)
+}
+
+func CreateClientConfigs(
+	cfg *models.ServerConfig,
+	clients *[]models.ClientDto,
+	keyPair *models.KeyPair, args *models.InstallArgs,
+) *[]models.ClientConfig {
+	result := make([]models.ClientConfig, len(*clients))
+	for ind, elem := range *clients {
+		clientConfig := models.ClientConfig{}
+		internal.ReadJson("client.template.json", &clientConfig)
+		result[ind] = *serverclients.CreateClientConfig(cfg, &elem, keyPair)
+	}
+	return &result
 }
 
 func AddClients() {
@@ -72,12 +101,8 @@ func ReadServerConfig(path string) (*models.ServerConfig, error) {
 	if path == "" {
 		path = "server.template.json"
 	}
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
 	config := models.ServerConfig{}
-	err = json.Unmarshal([]byte(file), &config)
+	err := internal.ReadJson(path, &config)
 	if err != nil {
 		return nil, err
 	}

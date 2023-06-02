@@ -18,3 +18,28 @@ func CreateClients(amount int) (*[]models.ClientDto, error) {
 	}
 	return &result, nil
 }
+
+func CreateClientConfig(
+	cfg *models.ServerConfig,
+	client *models.ClientDto,
+	keyPair *models.KeyPair,
+) *models.ClientConfig {
+	clientConfig := models.ClientConfig{}
+	internal.ReadJson("client.template.json", &clientConfig)
+	serverAddr, _ := internal.GetServerAddr()
+	first := clientConfig.FirstOutbound()
+	first.Settings.Vnext = models.ClientVnext{
+		Address: *serverAddr,
+		Port:    443,
+		Users: []models.ClientUser{
+			{
+				ID:         client.Client.ID,
+				Flow:       "xtls-rprx-vision",
+				Encryption: "none",
+			},
+		},
+	}
+	first.StreamSettings.RealitySettings.ServerName = cfg.FirstInbound().StreamSettings.RealitySettings.ServerNames[0]
+	first.StreamSettings.RealitySettings.PublicKey = keyPair.Pub
+	return &clientConfig
+}

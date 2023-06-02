@@ -25,5 +25,7 @@ func SetPrivateKey(
 }
 
 func SetDestinationAddress(serverConfig *models.ServerConfig, addr string) {
-	serverConfig.FirstInbound().StreamSettings.RealitySettings.Dest = addr + ":443"
+	first := serverConfig.FirstInbound()
+	first.StreamSettings.RealitySettings.Dest = addr + ":443"
+	first.StreamSettings.RealitySettings.ServerNames = []string{addr}
 }
