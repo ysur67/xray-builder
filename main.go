@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -9,39 +8,40 @@ import (
 	"xraybuilder/models"
 	"xraybuilder/service/serverclients"
 	"xraybuilder/service/serverconfig"
+
+	"github.com/alexflint/go-arg"
 )
 
 func main() {
 	mode := os.Args[0]
-	if mode == "" {
-		RunInstall()
-		return
-		// fmt.Println("Select mode: install, add")
-		// return
-	}
-	mode = strings.ToLower(mode)
+
 	if mode == "install" {
 		RunInstall()
 		return
 	}
+
 	if mode == "add" {
 		AddClients()
 		return
 	}
-	RunInstall()
-	return
 
+	os.Args = strings.Split("--help", " ")
+	var args models.InstallArgs
+	arg.MustParse(&args)
+	return
 }
 
 func RunInstall() {
-	args := ReadCreateArgs()
-	if args.DownloadXray {
-		err := internal.DownloadAndInstallXray(args)
+	var args models.InstallArgs
+	arg.MustParse(&args)
+
+	if args.InstallXray != "" {
+		err := internal.DownloadAndInstallXray(args.InstallXray)
 		if err != nil {
 			panic(err)
 		}
 	}
-	_, err := serverclients.CreateClients(args.ClientCount)
+	_, err := serverclients.CreateClients(args.UsersCount)
 	if err != nil {
 		panic(err)
 	}
@@ -53,12 +53,12 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	clients, err := serverclients.CreateClients(args.ClientCount)
+	clients, err := serverclients.CreateClients(args.UsersCount)
 	if err != nil {
 		panic(err)
 	}
-	InflateServerConfig(cfg, clients, keyPair, args)
-	clientConfigs := CreateClientConfigs(cfg, clients, keyPair, args)
+	InflateServerConfig(cfg, clients, keyPair, args.Destination)
+	clientConfigs := CreateClientConfigs(cfg, clients, keyPair)
 	internal.WriteToFile("config.json", &cfg)
 	for ind, elem := range *clientConfigs {
 		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
@@ -68,7 +68,8 @@ func RunInstall() {
 func InflateServerConfig(
 	cfg *models.ServerConfig,
 	clients *[]models.ClientDto,
-	keyPair *models.KeyPair, args *models.InstallArgs,
+	keyPair *models.KeyPair,
+	destination string,
 ) {
 	serverconfig.AppendClients(
 		cfg,
@@ -76,14 +77,13 @@ func InflateServerConfig(
 		&cfg.FirstInbound().StreamSettings,
 	)
 	serverconfig.SetPrivateKey(cfg, keyPair)
-	serverconfig.SetDestinationAddress(cfg, args.RedirectAddr)
+	serverconfig.SetDestinationAddress(cfg, destination)
 }
 
 func CreateClientConfigs(
 	cfg *models.ServerConfig,
 	clients *[]models.ClientDto,
-	keyPair *models.KeyPair, args *models.InstallArgs,
-) *[]models.ClientConfig {
+	keyPair *models.KeyPair) *[]models.ClientConfig {
 	result := make([]models.ClientConfig, len(*clients))
 	for ind, elem := range *clients {
 		clientConfig := models.ClientConfig{}
@@ -107,17 +107,4 @@ func ReadServerConfig(path string) (*models.ServerConfig, error) {
 		return nil, err
 	}
 	return &config, nil
-}
-
-func ReadCreateArgs() *models.InstallArgs {
-	clients := flag.Int("n", 3, "Amount of clients to create")
-	redirectAddress := flag.String("redir", "https://google.com", "Shadow address")
-	downloadXray := flag.Bool("preload", false, "Preload Xray")
-	xrayVersion := flag.String("version", "1.8.0", "Xray version, 1.8.0 default")
-	return &models.InstallArgs{
-		ClientCount:  *clients,
-		RedirectAddr: *redirectAddress,
-		DownloadXray: *downloadXray,
-		XrayVersion:  *xrayVersion,
-	}
 }
