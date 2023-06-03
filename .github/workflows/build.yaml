@@ -1,8 +1,5 @@
 name: Go
-on:
-  push:
-    paths:
-      - "*.go"
+on: [push]
 
 jobs:
   build:
