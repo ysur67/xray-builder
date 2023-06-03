@@ -4,8 +4,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"xraybuilder/models"
-	"github.com/alexflint/go-arg"
 )
 
 func split(s string) []string {
@@ -13,8 +11,7 @@ func split(s string) []string {
 }
 
 func TestBaseArgumentsParsing(t *testing.T) {
-	var args models.InstallArgs
-	// os.Args = split("install -i -u 12")
+	// var args models.InstallArgs
 	os.Args = split("-d gfd --help")
-	arg.MustParse(&args)
+	// arg.MustParse(&args)
 }

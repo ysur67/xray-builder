@@ -1,4 +1,4 @@
-package serverconfig
+package impl
 
 import (
 	"testing"
@@ -12,17 +12,23 @@ func config() *models.ServerConfig {
 	return &result
 }
 
+func service() *ServerServiceImpl {
+	return &ServerServiceImpl{}
+}
+
 func TestEmptyAppend(t *testing.T) {
-	config := config()
+	cfg := config()
+	svc := service()
 	var clients []models.ClientDto
-	AppendClients(config, &clients, &config.Inbounds[0].StreamSettings)
-	if len(config.Inbounds[0].Settings.Clients) != 0 {
-		t.Error("Expected no clients found", len(config.Inbounds))
+	svc.AppendClients(cfg, &clients, &cfg.Inbounds[0].StreamSettings)
+	if len(cfg.Inbounds[0].Settings.Clients) != 0 {
+		t.Error("Expected no clients found", len(cfg.Inbounds))
 	}
 }
 
 func TestAppend(t *testing.T) {
-	config := config()
+	cfg := config()
+	svc := service()
 	clients := make([]models.ClientDto, 5)
 	for ind := 0; ind < len(clients); ind++ {
 		clients[ind] = models.ClientDto{
@@ -33,29 +39,31 @@ func TestAppend(t *testing.T) {
 			ShortId: "jopajopajopa",
 		}
 	}
-	AppendClients(config, &clients, &config.Inbounds[0].StreamSettings)
-	if len(config.Inbounds[0].Settings.Clients) != len(clients) {
-		t.Errorf("Expected %v clients found %v", len(clients), len(config.Inbounds[0].Settings.Clients))
+	svc.AppendClients(cfg, &clients, &cfg.Inbounds[0].StreamSettings)
+	if len(cfg.Inbounds[0].Settings.Clients) != len(clients) {
+		t.Errorf("Expected %v clients found %v", len(clients), len(cfg.Inbounds[0].Settings.Clients))
 	}
 }
 
 func TestSetPrivateKey(t *testing.T) {
-	config := config()
+	cfg := config()
+	svc := service()
 	keyPair := models.KeyPair{
 		Pub:     "pub",
 		Private: "private",
 	}
-	SetPrivateKey(config, &keyPair)
-	if config.Inbounds[0].StreamSettings.RealitySettings.PrivateKey != keyPair.Private {
+	svc.SetPrivateKey(cfg, &keyPair)
+	if cfg.Inbounds[0].StreamSettings.RealitySettings.PrivateKey != keyPair.Private {
 		t.Error("Expected private key to be set, got invalid value instead")
 	}
 }
 
 func TestSetDestinationAddress(t *testing.T) {
-	config := config()
+	cfg := config()
 	addr := "https://rkn.gov.ru/"
-	SetDestinationAddress(config, addr)
-	if config.Inbounds[0].StreamSettings.RealitySettings.Dest != addr+":443" {
+	svc := service()
+	svc.SetDestinationAddress(cfg, addr)
+	if cfg.Inbounds[0].StreamSettings.RealitySettings.Dest != addr+":443" {
 		t.Error("Expected dest to be set, got value invalid instead")
 	}
 }

@@ -86,6 +86,10 @@ func (s *ServerConfig) FirstInbound() *Inbound {
 	return &s.Inbounds[0]
 }
 
+func (s *ServerConfig) ServerName() string {
+	return s.FirstInbound().StreamSettings.RealitySettings.ServerNames[0]
+}
+
 type ClientDto struct {
 	Client  Client
 	ShortId string
