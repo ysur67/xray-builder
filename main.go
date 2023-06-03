@@ -11,6 +11,7 @@ import (
 	bashexecutor "xraybuilder/domain/commands/bash"
 	clientservice "xraybuilder/domain/services/clients/bash"
 	bashservice "xraybuilder/domain/services/osservice/bash"
+	serverservice "xraybuilder/domain/services/server/bash"
 
 	"github.com/alexflint/go-arg"
 )
@@ -40,6 +41,7 @@ func RunInstall() {
 
 	osService := bashservice.NewBashOsService(bashexecutor.NewBashExecutor())
 	clientService := clientservice.NewBashClientsService(osService)
+	serverService := serverservice.NewBashServerService()
 
 	if args.InstallXray != "" {
 		err := osService.DownloadAndInstallXray(args.InstallXray)
@@ -47,7 +49,7 @@ func RunInstall() {
 			panic(err)
 		}
 	}
-	cfg, err := ReadServerConfig("")
+	cfg, err := serverService.ReadConfig("")
 	if err != nil {
 		panic(err)
 	}
@@ -85,7 +87,8 @@ func InflateServerConfig(
 func CreateClientConfigs(
 	cfg *models.ServerConfig,
 	clients *[]models.ClientDto,
-	keyPair *models.KeyPair) *[]models.ClientConfig {
+	keyPair *models.KeyPair,
+) *[]models.ClientConfig {
 	result := make([]models.ClientConfig, len(*clients))
 	for ind, elem := range *clients {
 		clientConfig := models.ClientConfig{}
@@ -97,16 +100,4 @@ func CreateClientConfigs(
 
 func AddClients() {
 
-}
-
-func ReadServerConfig(path string) (*models.ServerConfig, error) {
-	if path == "" {
-		path = "server.template.json"
-	}
-	config := models.ServerConfig{}
-	err := internal.ReadJson(path, &config)
-	if err != nil {
-		return nil, err
-	}
-	return &config, nil
 }
