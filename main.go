@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	bashexecutor "xraybuilder/domain/commands/bash"
+	bashservice "xraybuilder/domain/services/bash"
 	"xraybuilder/internal"
 	"xraybuilder/models"
 	"xraybuilder/service/serverclients"
@@ -35,8 +37,10 @@ func RunInstall() {
 	var args models.InstallArgs
 	arg.MustParse(&args)
 
+	osService := bashservice.NewBashOsService(bashexecutor.NewBashExecutor())
+
 	if args.InstallXray != "" {
-		err := internal.DownloadAndInstallXray(args.InstallXray)
+		err := osService.DownloadAndInstallXray(args.InstallXray)
 		if err != nil {
 			panic(err)
 		}
@@ -49,7 +53,7 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	keyPair, err := internal.GenerateKeyPair()
+	keyPair, err := osService.GenerateKeyPair()
 	if err != nil {
 		panic(err)
 	}
