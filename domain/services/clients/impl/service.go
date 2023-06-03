@@ -24,7 +24,7 @@ func (b *ClientCfgServiceImpl) CreateClients(count int) (*[]models.ClientDto, er
 
 func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.ClientDto, keyPair *models.KeyPair) (*models.ClientConfig, error) {
 	clientConfig := models.ClientConfig{}
-	internal.ReadJson("client.template.json", &clientConfig)
+	internal.ReadJson("configs/client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
 	first := clientConfig.FirstOutbound()
 	first.Settings.Vnext = models.ClientVnext{
@@ -47,8 +47,6 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 func (b *ClientCfgServiceImpl) CreateMultipleConfigs(serverName string, clients *[]models.ClientDto, keyPair *models.KeyPair) (*[]models.ClientConfig, error) {
 	result := make([]models.ClientConfig, len(*clients))
 	for ind, elem := range *clients {
-		clientConfig := models.ClientConfig{}
-		internal.ReadJson("client.template.json", &clientConfig)
 		config, err := b.CreateClientConfig(serverName, &elem, keyPair)
 		if err != nil {
 			return nil, err

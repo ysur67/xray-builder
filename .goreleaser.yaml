@@ -11,7 +11,7 @@ archives:
     id: linux-archive
 
     builds:
-    - default
+      - "linux-build"
 
     meta: true
 

@@ -9,7 +9,7 @@ type ServerServiceImpl struct{}
 
 func (s *ServerServiceImpl) ReadConfig(path string) (*models.ServerConfig, error) {
 	if path == "" {
-		path = "server.template.json"
+		path = "configs/server.template.json"
 	}
 	config := models.ServerConfig{}
 	err := internal.ReadJson(path, &config)
