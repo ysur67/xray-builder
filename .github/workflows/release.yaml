@@ -14,6 +14,6 @@ jobs:
         binary_name: "xraybuilder"
         goos: linux
         goarch: amd64
-        args: release --clean
+        args: release --clean -f .goreleaser.yaml
       env:
         GITHUB_TOKEN: ${{ secrets.GO_RELEASE_GITHUB_TOKEN }}
