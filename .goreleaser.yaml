@@ -13,9 +13,9 @@ archives:
     builds:
       - "linux-build"
 
-    meta: true
-
     name_template: "{{ .ProjectName }}_{{ .Version }}"
+
+    wrap_in_directory: true
 
     files:
       - configs/client.template.json
