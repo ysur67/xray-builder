@@ -16,7 +16,7 @@ import (
 func main() {
 	mode := os.Args[0]
 
-	if mode == "install" {
+	if mode == "create" {
 		RunInstall()
 		return
 	}
