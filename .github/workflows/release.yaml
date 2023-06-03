@@ -11,9 +11,6 @@ jobs:
     - uses: goreleaser/goreleaser-action@v4
       with:
         version: latest
-        binary_name: "xraybuilder"
-        goos: linux
-        goarch: amd64
         args: release --clean -f .goreleaser.yaml
       env:
         GITHUB_TOKEN: ${{ secrets.GO_RELEASE_GITHUB_TOKEN }}
