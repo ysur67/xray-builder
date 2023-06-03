@@ -64,6 +64,10 @@ func (s *LinuxOsService) WriteConfigs(serverConfig *models.ServerConfig, clientC
 	}
 }
 
+func (s *LinuxOsService) RestartXray() error {
+	return s.executor.RestartXray()
+}
+
 func NewLinuxOsService(executor *commands.BashCmdExecutor) *LinuxOsService {
 	return &LinuxOsService{executor: *executor}
 }

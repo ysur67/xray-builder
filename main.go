@@ -63,6 +63,9 @@ func RunInstall() {
 		panic(err)
 	}
 	osService.WriteConfigs(cfg, clientConfigs)
+	if err = osService.RestartXray(); err != nil {
+		panic(err)
+	}
 }
 
 func AddClients() {
