@@ -1,9 +1,11 @@
 package linux
 
 import (
+	"fmt"
 	"strings"
 	commands "xraybuilder/domain/commands/bash"
 	"xraybuilder/domain/services/osservice"
+	"xraybuilder/internal"
 	"xraybuilder/models"
 )
 
@@ -52,6 +54,18 @@ func (s *LinuxOsService) GetServerAddr() (*string, error) {
 
 func (s *LinuxOsService) GenerateShortId() (*string, error) {
 	return s.executor.GenerateShortId()
+}
+
+func (s *LinuxOsService) WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig) {
+	sysPath := "/usr/local/etc/xray/config.json"
+	internal.WriteToFile(sysPath, &serverConfig)
+	for ind, elem := range *clientConfigs {
+		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
+	}
+}
+
+func (s *LinuxOsService) RestartXray() error {
+	return s.executor.RestartXray()
 }
 
 func NewLinuxOsService(executor *commands.BashCmdExecutor) *LinuxOsService {

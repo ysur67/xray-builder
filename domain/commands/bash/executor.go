@@ -50,6 +50,11 @@ func (b *BashCmdExecutor) GetServerAddr() (*string, error) {
 	return &result, nil
 }
 
+func (b *BashCmdExecutor) RestartXray() error {
+	_, _, err := shellout("systemctl restart xray")
+	return err
+}
+
 func shellout(command string) (string, string, error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer

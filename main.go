@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"xraybuilder/internal"
@@ -16,9 +15,9 @@ import (
 )
 
 func main() {
-	mode := os.Args[0]
-
-	if mode == "install" {
+	mode := os.Args[1]
+	os.Args = internal.RemoveByIndex(os.Args, 1)
+	if mode == "create" {
 		RunInstall()
 		return
 	}
@@ -64,9 +63,9 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	internal.WriteToFile("config.json", &cfg)
-	for ind, elem := range *clientConfigs {
-		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
+	osService.WriteConfigs(cfg, clientConfigs)
+	if err = osService.RestartXray(); err != nil {
+		panic(err)
 	}
 }
 

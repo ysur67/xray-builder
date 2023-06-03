@@ -9,4 +9,6 @@ type OsService interface {
 	DownloadAndInstallXray(version string) error
 	GetServerAddr() (*string, error)
 	GenerateShortId() (*string, error)
+	WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig)
+	RestartXray() error
 }

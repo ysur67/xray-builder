@@ -5,4 +5,5 @@ type CmdExecutor interface {
 	DownloadAndInstallXray(version string) error
 	GenerateShortId() (*string, error)
 	GetServerAddr() (*string, error)
+	RestartXray() error
 }
