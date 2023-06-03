@@ -1,9 +1,9 @@
-package keypair
+package bash
 
 import "testing"
 
 func TestValidFromStdOut(t *testing.T) {
-	result, err := FromStdOut("Private key: uHMCmvXiUFxdniESp-k_lZHwnpkxNxeqjPAdPgKhNWo\nPublic key: 2M_r3tjVelo8SGo2zaWOjGeMkHkDFO9TxtDeMIoa2ns")
+	result, err := fromStdOut("Private key: uHMCmvXiUFxdniESp-k_lZHwnpkxNxeqjPAdPgKhNWo\nPublic key: 2M_r3tjVelo8SGo2zaWOjGeMkHkDFO9TxtDeMIoa2ns")
 	if err != nil {
 		t.Error("Invalid response, expected no errors")
 	}
@@ -16,7 +16,7 @@ func TestValidFromStdOut(t *testing.T) {
 }
 
 func TestInvalidStdOut(t *testing.T) {
-	result, err := FromStdOut("joajpajospajasposadjo\n")
+	result, err := fromStdOut("joajpajospajasposadjo\n")
 	if err == nil {
 		t.Error("Expected error got response")
 	}
