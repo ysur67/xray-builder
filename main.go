@@ -9,7 +9,7 @@ import (
 
 	bashexecutor "xraybuilder/domain/commands/bash"
 	clientservice "xraybuilder/domain/services/clients/bash"
-	bashservice "xraybuilder/domain/services/osservice/bash"
+	"xraybuilder/domain/services/osservice/linux"
 	serverservice "xraybuilder/domain/services/server/bash"
 
 	"github.com/alexflint/go-arg"
@@ -37,7 +37,7 @@ func RunInstall() {
 	var args models.InstallArgs
 	arg.MustParse(&args)
 
-	osService := bashservice.NewBashOsService(bashexecutor.NewBashExecutor())
+	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
 	clientService := clientservice.NewBashClientsService(osService)
 	serverService := serverservice.NewBashServerService()
 

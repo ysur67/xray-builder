@@ -4,19 +4,50 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 const ShellToUse = "bash"
 
 type BashCmdExecutor struct{}
 
-func (b *BashCmdExecutor) Execute(cmd string) (*string, error) {
-	out, stderr, err := shellout(cmd)
+func (b *BashCmdExecutor) GenerateKeyPair() (*string, error) {
+	out, _, err := shellout("xray x25519")
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(stderr)
 	return &out, nil
+}
+
+func (b *BashCmdExecutor) DownloadAndInstallXray(version string) error {
+	cmd := fmt.Sprintf(
+		`bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u root --version %s`,
+		version,
+	)
+	out, _, err := shellout(cmd)
+	if err != nil {
+		return err
+	}
+	fmt.Println(out)
+	return nil
+}
+
+func (b *BashCmdExecutor) GenerateShortId() (*string, error) {
+	out, _, err := shellout("openssl rand -hex 8")
+	if err != nil {
+		return nil, err
+	}
+	result := strings.TrimSuffix(out, "\n")
+	return &result, nil
+}
+
+func (b *BashCmdExecutor) GetServerAddr() (*string, error) {
+	out, _, err := shellout("hostname -I")
+	if err != nil {
+		return nil, err
+	}
+	result := strings.Split(out, " ")[0]
+	return &result, nil
 }
 
 func shellout(command string) (string, string, error) {

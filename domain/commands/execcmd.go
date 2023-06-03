@@ -1,5 +1,8 @@
 package commands
 
 type CmdExecutor interface {
-	Execute(cmd string) (*string, error)
+	GenerateKeyPair() (*string, error)
+	DownloadAndInstallXray(version string) error
+	GenerateShortId() (*string, error)
+	GetServerAddr() (*string, error)
 }
