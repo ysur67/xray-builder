@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"strings"
+	"xraybuilder/internal"
 	"xraybuilder/models"
 
 	bashexecutor "xraybuilder/domain/commands/bash"
@@ -14,8 +15,8 @@ import (
 )
 
 func main() {
-	mode := os.Args[0]
-
+	mode := os.Args[1]
+	os.Args = internal.RemoveByIndex(os.Args, 1)
 	if mode == "create" {
 		RunInstall()
 		return
