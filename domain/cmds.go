@@ -6,4 +6,5 @@ const (
 	DownloadCmd Command = iota
 	GenerateKeyPair
 	GetServerAddr
+	GenerateShortId
 )

@@ -46,6 +46,15 @@ func (s *BashOsService) GetServerAddr() (*string, error) {
 	return &result, nil
 }
 
+func (s *BashOsService) GenerateShortId() (*string, error) {
+	out, err := s.executor.Execute("openssl rand -hex 8")
+	if err != nil {
+		return nil, err
+	}
+	result := strings.TrimSuffix(*out, "\n")
+	return &result, nil
+}
+
 func NewBashOsService(executor commands.CmdExecutor) *BashOsService {
 	return &BashOsService{executor: executor}
 }

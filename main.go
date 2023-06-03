@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	bashexecutor "xraybuilder/domain/commands/bash"
-	bashservice "xraybuilder/domain/services/bash"
 	"xraybuilder/internal"
 	"xraybuilder/models"
-	"xraybuilder/service/serverclients"
 	"xraybuilder/service/serverconfig"
+
+	bashexecutor "xraybuilder/domain/commands/bash"
+	clientservice "xraybuilder/domain/services/clients/bash"
+	bashservice "xraybuilder/domain/services/osservice/bash"
 
 	"github.com/alexflint/go-arg"
 )
@@ -38,16 +39,13 @@ func RunInstall() {
 	arg.MustParse(&args)
 
 	osService := bashservice.NewBashOsService(bashexecutor.NewBashExecutor())
+	clientService := clientservice.NewBashClientsService(osService)
 
 	if args.InstallXray != "" {
 		err := osService.DownloadAndInstallXray(args.InstallXray)
 		if err != nil {
 			panic(err)
 		}
-	}
-	_, err := serverclients.CreateClients(args.UsersCount)
-	if err != nil {
-		panic(err)
 	}
 	cfg, err := ReadServerConfig("")
 	if err != nil {
@@ -57,7 +55,7 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	clients, err := serverclients.CreateClients(args.UsersCount)
+	clients, err := clientService.CreateClients(args.UsersCount)
 	if err != nil {
 		panic(err)
 	}
