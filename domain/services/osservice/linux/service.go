@@ -68,6 +68,16 @@ func (s *LinuxOsService) RestartXray() error {
 	return s.executor.RestartXray()
 }
 
+func (s *LinuxOsService) SuppressLoginMessage() error {
+	return s.executor.SuppressLoginMessage()
+}
+func (s *LinuxOsService) ApplyIptablesRules() error {
+	return s.executor.ApplyIptablesRules()
+}
+func (s *LinuxOsService) EnableTcpBBR() error {
+	return s.executor.EnableTcpBBR()
+}
+
 func NewLinuxOsService(executor *commands.BashCmdExecutor) *LinuxOsService {
 	return &LinuxOsService{executor: *executor}
 }

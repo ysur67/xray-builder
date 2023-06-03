@@ -11,4 +11,7 @@ type OsService interface {
 	GenerateShortId() (*string, error)
 	WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig)
 	RestartXray() error
+	SuppressLoginMessage() error
+	ApplyIptablesRules() error
+	EnableTcpBBR() error
 }
