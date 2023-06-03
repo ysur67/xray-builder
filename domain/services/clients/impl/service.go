@@ -1,4 +1,4 @@
-package bash
+package impl
 
 import (
 	"xraybuilder/domain/services/osservice"
@@ -6,11 +6,11 @@ import (
 	"xraybuilder/models"
 )
 
-type BashClientsService struct {
+type ClientCfgServiceImpl struct {
 	svc osservice.OsService
 }
 
-func (b *BashClientsService) CreateClients(count int) (*[]models.ClientDto, error) {
+func (b *ClientCfgServiceImpl) CreateClients(count int) (*[]models.ClientDto, error) {
 	result := make([]models.ClientDto, count)
 	for ind := 0; ind < count; ind++ {
 		shortId, err := b.svc.GenerateShortId()
@@ -22,7 +22,7 @@ func (b *BashClientsService) CreateClients(count int) (*[]models.ClientDto, erro
 	return &result, nil
 }
 
-func (b *BashClientsService) CreateClientConfig(serverName string, client *models.ClientDto, keyPair *models.KeyPair) (*models.ClientConfig, error) {
+func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.ClientDto, keyPair *models.KeyPair) (*models.ClientConfig, error) {
 	clientConfig := models.ClientConfig{}
 	internal.ReadJson("client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
@@ -44,7 +44,7 @@ func (b *BashClientsService) CreateClientConfig(serverName string, client *model
 	return &clientConfig, nil
 }
 
-func (b *BashClientsService) CreateMultipleConfigs(serverName string, clients *[]models.ClientDto, keyPair *models.KeyPair) (*[]models.ClientConfig, error) {
+func (b *ClientCfgServiceImpl) CreateMultipleConfigs(serverName string, clients *[]models.ClientDto, keyPair *models.KeyPair) (*[]models.ClientConfig, error) {
 	result := make([]models.ClientConfig, len(*clients))
 	for ind, elem := range *clients {
 		clientConfig := models.ClientConfig{}
@@ -58,6 +58,6 @@ func (b *BashClientsService) CreateMultipleConfigs(serverName string, clients *[
 	return &result, nil
 }
 
-func NewBashClientsService(svc osservice.OsService) *BashClientsService {
-	return &BashClientsService{svc: svc}
+func NewClientCfgServiceImpl(svc osservice.OsService) *ClientCfgServiceImpl {
+	return &ClientCfgServiceImpl{svc: svc}
 }

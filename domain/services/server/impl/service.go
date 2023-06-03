@@ -1,13 +1,13 @@
-package bash
+package impl
 
 import (
 	"xraybuilder/internal"
 	"xraybuilder/models"
 )
 
-type BashServerService struct{}
+type ServerServiceImpl struct{}
 
-func (s *BashServerService) ReadConfig(path string) (*models.ServerConfig, error) {
+func (s *ServerServiceImpl) ReadConfig(path string) (*models.ServerConfig, error) {
 	if path == "" {
 		path = "server.template.json"
 	}
@@ -19,7 +19,7 @@ func (s *BashServerService) ReadConfig(path string) (*models.ServerConfig, error
 	return &config, nil
 }
 
-func (s *BashServerService) AppendClients(
+func (s *ServerServiceImpl) AppendClients(
 	cfg *models.ServerConfig,
 	clients *[]models.ClientDto,
 	streamSettings *models.StreamSettingsObject,
@@ -35,20 +35,20 @@ func (s *BashServerService) AppendClients(
 	first.StreamSettings.RealitySettings.ShortIds = append(first.StreamSettings.RealitySettings.ShortIds, shortIds...)
 }
 
-func (s *BashServerService) SetPrivateKey(
+func (s *ServerServiceImpl) SetPrivateKey(
 	cfg *models.ServerConfig,
 	keyPair *models.KeyPair,
 ) {
 	cfg.FirstInbound().StreamSettings.RealitySettings.PrivateKey = keyPair.Private
 }
 
-func (s *BashServerService) SetDestinationAddress(cfg *models.ServerConfig, addr string) {
+func (s *ServerServiceImpl) SetDestinationAddress(cfg *models.ServerConfig, addr string) {
 	first := cfg.FirstInbound()
 	first.StreamSettings.RealitySettings.Dest = addr + ":443"
 	first.StreamSettings.RealitySettings.ServerNames = []string{addr}
 }
 
-func (s *BashServerService) InflateServerConfig(cfg *models.ServerConfig, clients *[]models.ClientDto, keyPair *models.KeyPair, destination string) {
+func (s *ServerServiceImpl) InflateServerConfig(cfg *models.ServerConfig, clients *[]models.ClientDto, keyPair *models.KeyPair, destination string) {
 	s.AppendClients(
 		cfg,
 		clients,
@@ -58,6 +58,6 @@ func (s *BashServerService) InflateServerConfig(cfg *models.ServerConfig, client
 	s.SetDestinationAddress(cfg, destination)
 }
 
-func NewBashServerService() *BashServerService {
-	return &BashServerService{}
+func NewServerServiceImpl() *ServerServiceImpl {
+	return &ServerServiceImpl{}
 }

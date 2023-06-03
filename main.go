@@ -8,9 +8,9 @@ import (
 	"xraybuilder/models"
 
 	bashexecutor "xraybuilder/domain/commands/bash"
-	clientservice "xraybuilder/domain/services/clients/bash"
+	clientservice "xraybuilder/domain/services/clients/impl"
 	"xraybuilder/domain/services/osservice/linux"
-	serverservice "xraybuilder/domain/services/server/bash"
+	serverservice "xraybuilder/domain/services/server/impl"
 
 	"github.com/alexflint/go-arg"
 )
@@ -38,8 +38,8 @@ func RunInstall() {
 	arg.MustParse(&args)
 
 	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
-	clientService := clientservice.NewBashClientsService(osService)
-	serverService := serverservice.NewBashServerService()
+	clientService := clientservice.NewClientCfgServiceImpl(osService)
+	serverService := serverservice.NewServerServiceImpl()
 
 	if args.InstallXray != "" {
 		err := osService.DownloadAndInstallXray(args.InstallXray)

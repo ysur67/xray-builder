@@ -1,4 +1,4 @@
-package bash
+package impl
 
 import (
 	"testing"
@@ -12,8 +12,8 @@ func config() *models.ServerConfig {
 	return &result
 }
 
-func service() *BashServerService {
-	return &BashServerService{}
+func service() *ServerServiceImpl {
+	return &ServerServiceImpl{}
 }
 
 func TestEmptyAppend(t *testing.T) {
