@@ -40,6 +40,21 @@ func RunInstall() {
 	clientService := clientservice.NewClientCfgServiceImpl(osService)
 	serverService := serverservice.NewServerServiceImpl()
 
+	if args.InstallMisc {
+		err := osService.SuppressLoginMessage()
+		if err != nil {
+			panic(err)
+		}
+		err = osService.ApplyIptablesRules()
+		if err != nil {
+			panic(err)
+		}
+		err = osService.EnableTcpBBR()
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	if args.InstallXray != "" {
 		err := osService.DownloadAndInstallXray(args.InstallXray)
 		if err != nil {
