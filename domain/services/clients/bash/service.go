@@ -44,6 +44,20 @@ func (b *BashClientsService) CreateClientConfig(serverName string, client *model
 	return &clientConfig, nil
 }
 
+func (b *BashClientsService) CreateMultipleConfigs(serverName string, clients *[]models.ClientDto, keyPair *models.KeyPair) (*[]models.ClientConfig, error) {
+	result := make([]models.ClientConfig, len(*clients))
+	for ind, elem := range *clients {
+		clientConfig := models.ClientConfig{}
+		internal.ReadJson("client.template.json", &clientConfig)
+		config, err := b.CreateClientConfig(serverName, &elem, keyPair)
+		if err != nil {
+			return nil, err
+		}
+		result[ind] = *config
+	}
+	return &result, nil
+}
+
 func NewBashClientsService(svc osservice.OsService) *BashClientsService {
 	return &BashClientsService{svc: svc}
 }

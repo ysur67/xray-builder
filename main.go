@@ -6,7 +6,6 @@ import (
 	"strings"
 	"xraybuilder/internal"
 	"xraybuilder/models"
-	"xraybuilder/service/serverconfig"
 
 	bashexecutor "xraybuilder/domain/commands/bash"
 	clientservice "xraybuilder/domain/services/clients/bash"
@@ -32,7 +31,6 @@ func main() {
 	os.Args = strings.Split("--help", " ")
 	var args models.InstallArgs
 	arg.MustParse(&args)
-	return
 }
 
 func RunInstall() {
@@ -61,41 +59,15 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	InflateServerConfig(cfg, clients, keyPair, args.Destination)
-	clientConfigs := CreateClientConfigs(cfg, clients, keyPair)
+	serverService.InflateServerConfig(cfg, clients, keyPair, args.Destination)
+	clientConfigs, err := clientService.CreateMultipleConfigs(cfg.ServerName(), clients, keyPair)
+	if err != nil {
+		panic(err)
+	}
 	internal.WriteToFile("config.json", &cfg)
 	for ind, elem := range *clientConfigs {
 		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
 	}
-}
-
-func InflateServerConfig(
-	cfg *models.ServerConfig,
-	clients *[]models.ClientDto,
-	keyPair *models.KeyPair,
-	destination string,
-) {
-	serverconfig.AppendClients(
-		cfg,
-		clients,
-		&cfg.FirstInbound().StreamSettings,
-	)
-	serverconfig.SetPrivateKey(cfg, keyPair)
-	serverconfig.SetDestinationAddress(cfg, destination)
-}
-
-func CreateClientConfigs(
-	cfg *models.ServerConfig,
-	clients *[]models.ClientDto,
-	keyPair *models.KeyPair,
-) *[]models.ClientConfig {
-	result := make([]models.ClientConfig, len(*clients))
-	for ind, elem := range *clients {
-		clientConfig := models.ClientConfig{}
-		internal.ReadJson("client.template.json", &clientConfig)
-		result[ind] = *serverclients.CreateClientConfig(cfg, &elem, keyPair)
-	}
-	return &result
 }
 
 func AddClients() {
