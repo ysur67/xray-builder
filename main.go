@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
-	"xraybuilder/internal"
 	"xraybuilder/models"
 
 	bashexecutor "xraybuilder/domain/commands/bash"
@@ -64,10 +62,7 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	internal.WriteToFile("config.json", &cfg)
-	for ind, elem := range *clientConfigs {
-		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
-	}
+	osService.WriteConfigs(cfg, clientConfigs)
 }
 
 func AddClients() {
