@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"xraybuilder/internal"
 	"xraybuilder/models"
 
@@ -28,9 +27,7 @@ func main() {
 		return
 	}
 
-	os.Args = strings.Split("--help", " ")
-	var args models.InstallArgs
-	arg.MustParse(&args)
+	fmt.Println(`Select one of the commands "add" or "create".`)
 }
 
 func RunInstall() {
