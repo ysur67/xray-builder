@@ -2,6 +2,7 @@ package linux
 
 import (
 	"fmt"
+	"os/user"
 	commands "xraybuilder/domain/commands"
 	"xraybuilder/internal"
 	"xraybuilder/models"
@@ -42,13 +43,23 @@ func (s *LinuxOsService) RestartXray() error {
 func (s *LinuxOsService) SuppressLoginMessage() error {
 	return s.executor.SuppressLoginMessage()
 }
+
 func (s *LinuxOsService) ApplyIptablesRules() error {
 	return s.executor.ApplyIptablesRules()
 }
+
 func (s *LinuxOsService) EnableTcpBBR() error {
 	return s.executor.EnableTcpBBR()
 }
 
-func NewLinuxOsService(executor *commands.BashCmdExecutor) *LinuxOsService {
-	return &LinuxOsService{executor: *executor}
+func (s *LinuxOsService) IsSuperUser() (bool, error) {
+	currentUser, err := user.Current()
+	if err != nil {
+		return false, err
+	}
+	return currentUser.Username == "root", nil
+}
+
+func NewLinuxOsService(executor commands.CmdExecutor) *LinuxOsService {
+	return &LinuxOsService{executor: executor}
 }

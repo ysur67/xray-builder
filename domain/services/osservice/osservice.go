@@ -14,4 +14,5 @@ type OsService interface {
 	SuppressLoginMessage() error
 	ApplyIptablesRules() error
 	EnableTcpBBR() error
+	IsSuperUser() (bool, error)
 }

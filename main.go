@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"xraybuilder/internal"
@@ -39,6 +40,16 @@ func RunInstall() {
 	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
 	clientService := clientservice.NewClientCfgServiceImpl(osService)
 	serverService := serverservice.NewServerServiceImpl()
+
+	isSuperUser, err := osService.IsSuperUser()
+	if err != nil {
+		panic(err)
+	}
+
+	if !isSuperUser {
+		fmt.Println("Must be run as superuser")
+		return
+	}
 
 	if args.InstallMisc {
 		err := osService.SuppressLoginMessage()
