@@ -99,13 +99,30 @@ func AddClients() {
 	var args models.AddArgs
 	arg.MustParse(&args)
 
+	if args.Add < 1 {
+		fmt.Println("The number of users must be greater than 0")
+		return
+	}
+
 	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
+
+	isSuperUser, err := osService.IsSuperUser()
+	if err != nil {
+		panic(err)
+	}
+
+	if !isSuperUser {
+		fmt.Println("Must be run as superuser")
+		return
+	}
+
 	clientService := clientservice.NewClientCfgServiceImpl(osService)
 	serverService := serverservice.NewServerServiceImpl()
 	serverConfig, err := serverService.ReadConfig(internal.LinuxConfigPath)
 	if err != nil {
 		panic(err)
 	}
+	usersCount := serverService.CurrentUsers(serverConfig)
 	clients, err := clientService.CreateClients(args.Add)
 	if err != nil {
 		panic(err)
@@ -119,7 +136,5 @@ func AddClients() {
 	if err != nil {
 		panic(err)
 	}
-	usersCount := serverService.CurrentUsers(serverConfig)
 	osService.WriteConfigs(serverConfig, clientConfigs, usersCount)
-
 }
