@@ -1,7 +1,9 @@
 package commands
 
+import "xraybuilder/models"
+
 type CmdExecutor interface {
-	GenerateKeyPair() (*string, error)
+	GenerateKeyPair() (*models.KeyPair, error)
 	DownloadAndInstallXray(version string) error
 	GenerateShortId() (*string, error)
 	GetServerAddr() (*string, error)

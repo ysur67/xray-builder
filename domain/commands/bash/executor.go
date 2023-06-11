@@ -5,18 +5,23 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"xraybuilder/models"
 )
 
 const ShellToUse = "bash"
 
 type BashCmdExecutor struct{}
 
-func (b *BashCmdExecutor) GenerateKeyPair() (*string, error) {
+func (b *BashCmdExecutor) GenerateKeyPair() (*models.KeyPair, error) {
 	out, _, err := shellout("xray x25519")
 	if err != nil {
 		return nil, err
 	}
-	return &out, nil
+	keyPair, err := fromStdOut(out)
+	if err != nil {
+		return nil, err
+	}
+	return keyPair, nil
 }
 
 func (b *BashCmdExecutor) DownloadAndInstallXray(version string) error {
