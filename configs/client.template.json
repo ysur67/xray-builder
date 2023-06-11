@@ -79,8 +79,8 @@
             "settings": {
                 "vnext": [
                     {
-                        "address": "167.99.243.148",
-                        "port": 443,
+                        "address": "",
+                        "port": 0,
                         "users": []
                     }
                 ]
@@ -91,9 +91,9 @@
                 "realitySettings": {
                     "show": false,
                     "fingerprint": "chrome",
-                    "serverName": "www.microsoft.com",
-                    "publicKey": "ioE61VC3V30U7IdRmQ3bjhOq2ij9tPhVIgAD4JZ4YRY",
-                    "shortId": "b1",
+                    "serverName": "",
+                    "publicKey": "",
+                    "shortId": "",
                     "spiderX": "/"
                 }
             },

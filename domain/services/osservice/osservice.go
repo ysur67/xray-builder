@@ -9,7 +9,8 @@ type OsService interface {
 	DownloadAndInstallXray(version string) error
 	GetServerAddr() (*string, error)
 	GenerateShortId() (*string, error)
-	WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig)
+	WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig, clientStartIndex int)
+	SaveKeyPair(pair *models.KeyPair) error
 	RestartXray() error
 	SuppressLoginMessage() error
 	ApplyIptablesRules() error

@@ -28,12 +28,23 @@ func (s *LinuxOsService) GenerateShortId() (*string, error) {
 	return s.executor.GenerateShortId()
 }
 
-func (s *LinuxOsService) WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig) {
-	sysPath := "/usr/local/etc/xray/config.json"
-	internal.WriteToFile(sysPath, &serverConfig)
+func (s *LinuxOsService) WriteConfigs(
+	serverConfig *models.ServerConfig,
+	clientConfigs *[]models.ClientConfig,
+	clientStartIndex int,
+) {
+	internal.WriteToFile(internal.LinuxConfigPath, &serverConfig)
 	for ind, elem := range *clientConfigs {
-		internal.WriteToFile(fmt.Sprintf("client%v.json", ind), &elem)
+		configIndex := clientStartIndex + ind
+		internal.WriteToFile(fmt.Sprintf("client%v.json", configIndex), &elem)
 	}
+}
+
+func (s *LinuxOsService) SaveKeyPair(pair *models.KeyPair) error {
+	if err := internal.WriteToFile(internal.LinuxKeyPairPath, &pair); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *LinuxOsService) RestartXray() error {
