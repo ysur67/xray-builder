@@ -58,6 +58,18 @@ func (s *ServerServiceImpl) InflateServerConfig(cfg *models.ServerConfig, client
 	s.SetDestinationAddress(cfg, destination)
 }
 
+func (s *ServerServiceImpl) CurrentUsers(cfg *models.ServerConfig) int {
+	return len(cfg.FirstInbound().Settings.Clients)
+}
+
+func (s *ServerServiceImpl) ReadKeyPair(path string) (*models.KeyPair, error) {
+	var result models.KeyPair
+	if err := internal.ReadJson(path, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 func NewServerServiceImpl() *ServerServiceImpl {
 	return &ServerServiceImpl{}
 }

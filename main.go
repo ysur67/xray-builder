@@ -77,6 +77,9 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
+	if err = osService.SaveKeyPair(keyPair); err != nil {
+		panic(err)
+	}
 	clients, err := clientService.CreateClients(args.UsersCount)
 	if err != nil {
 		panic(err)
@@ -86,12 +89,37 @@ func RunInstall() {
 	if err != nil {
 		panic(err)
 	}
-	osService.WriteConfigs(cfg, clientConfigs)
+	osService.WriteConfigs(cfg, clientConfigs, 0)
 	if err = osService.RestartXray(); err != nil {
 		panic(err)
 	}
 }
 
 func AddClients() {
+	var args models.AddArgs
+	arg.MustParse(&args)
+
+	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
+	clientService := clientservice.NewClientCfgServiceImpl(osService)
+	serverService := serverservice.NewServerServiceImpl()
+	serverConfig, err := serverService.ReadConfig(internal.LinuxConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	clients, err := clientService.CreateClients(args.Add)
+	if err != nil {
+		panic(err)
+	}
+	serverService.AppendClients(serverConfig, clients, &serverConfig.FirstInbound().StreamSettings)
+	keyPair, err := serverService.ReadKeyPair(internal.LinuxKeyPairPath)
+	if err != nil {
+		panic(err)
+	}
+	clientConfigs, err := clientService.CreateMultipleConfigs(serverConfig.ServerName(), clients, keyPair)
+	if err != nil {
+		panic(err)
+	}
+	usersCount := serverService.CurrentUsers(serverConfig)
+	osService.WriteConfigs(serverConfig, clientConfigs, usersCount)
 
 }
