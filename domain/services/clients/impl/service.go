@@ -27,7 +27,8 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 	internal.ReadJson("configs/client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
 	first := clientConfig.FirstOutbound()
-	first.Settings.Vnext = models.ClientVnext{
+	vnext := make([]models.ClientVnext, 1)
+	vnext[0] = models.ClientVnext{
 		Address: *serverAddr,
 		Port:    443,
 		Users: []models.ClientUser{
@@ -38,6 +39,7 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 			},
 		},
 	}
+	first.Settings.Vnext = vnext
 	first.StreamSettings.RealitySettings.ShortID = client.ShortId
 	first.StreamSettings.RealitySettings.ServerName = serverName
 	first.StreamSettings.RealitySettings.PublicKey = keyPair.Pub
