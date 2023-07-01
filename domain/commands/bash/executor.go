@@ -71,36 +71,54 @@ func shellout(command string) (string, string, error) {
 }
 
 func (b *BashCmdExecutor) SuppressLoginMessage() error {
-	_, _, err := shellout("touch .hushlogin")
+	_, _, err := shellout("touch ~/.hushlogin")
 	return err
 }
-func (b *BashCmdExecutor) ApplyIptablesRules() error {
-	_, _, err := shellout(`
-	iptables -A INPUT -i lo -j ACCEPT;
-	iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT;
-	iptables -A INPUT -p icmp -j ACCEPT;
-	iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT;
-	iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT;
-	iptables -A INPUT -p tcp --dport 80 -j ACCEPT;
-	iptables -A INPUT -p tcp --dport 443 -j ACCEPT;
-	iptables -P INPUT DROP;
-	ip6tables -A INPUT -i lo -j ACCEPT;
-	ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT;
-	ip6tables -A INPUT -p ipv6-icmp -j ACCEPT;
-	ip6tables -P INPUT DROP;
-	apt install iptables-persistent;
-	`)
 
-	return err
+func (b *BashCmdExecutor) ApplyIptablesRules() error {
+	cmds := [...]string{
+		"iptables -A INPUT -i lo -j ACCEPT",
+		"iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT",
+		"iptables -A INPUT -p icmp -j ACCEPT",
+		"iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT",
+		"iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT",
+		"iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
+		"iptables -A INPUT -p tcp --dport 443 -j ACCEPT",
+		"iptables -P INPUT DROP",
+		"ip6tables -A INPUT -i lo -j ACCEPT",
+		"ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT",
+		"ip6tables -A INPUT -p ipv6-icmp -j ACCEPT",
+		"ip6tables -P INPUT DROP",
+		"apt install iptables-persistent -y",
+	}
+	for _, el := range cmds {
+		out, _, err := shellout(el)
+		if err != nil {
+			return err
+		}
+		if out != "" {
+			fmt.Println(out)
+		}
+	}
+	return nil
 }
+
 func (b *BashCmdExecutor) EnableTcpBBR() error {
-	_, _, err := shellout(`
+	stdout, stderr, err := shellout(`
 	echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf;
 	echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf;
 	sysctl -p;
 	`)
-
-	return err
+	if err != nil {
+		return err
+	}
+	if stderr != "" {
+		fmt.Println(stderr)
+	}
+	if stdout != "" {
+		fmt.Println(stderr)
+	}
+	return nil
 }
 
 func NewBashExecutor() *BashCmdExecutor {
