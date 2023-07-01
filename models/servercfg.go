@@ -3,14 +3,14 @@ package models
 import "github.com/google/uuid"
 
 type LogObject struct {
-	LogLevel string `json:"logLevel"`
+	LogLevel string `json:"loglevel"`
 }
 
 type Rule struct {
-	Type        string   `json:"type"`
-	Domain      []string `json:"domain"`
-	OutBoundTag string   `json:"outboundTag"`
-	Ip          []string `json:"ip"`
+	Type        string    `json:"type"`
+	Domain      []string  `json:"domain,omitempty"`
+	OutBoundTag string    `json:"outboundTag"`
+	Ip          *[]string `json:"ip,omitempty"`
 }
 
 type InboudSettings struct {
