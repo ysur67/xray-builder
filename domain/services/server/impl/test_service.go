@@ -35,7 +35,7 @@ func TestAppend(t *testing.T) {
 	for ind := 0; ind < ClientsCount; ind++ {
 		client := models.ClientDto{
 			Client: models.Client{
-				ID:   "asdfadsfd",
+				Id:   "asdfadsfd",
 				Flow: "asdfasdfdsa",
 			},
 			ShortId: "jopajopajopa",

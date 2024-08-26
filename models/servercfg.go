@@ -19,7 +19,7 @@ type InboudSettings struct {
 }
 
 type Client struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Flow string `json:"flow"`
 
 	// Comment for the user.
@@ -103,7 +103,7 @@ func NewClient(shortId string, comment string) *ClientDto {
 	return &ClientDto{
 		Client: Client{
 			Comment: comment,
-			ID:      uuid.New().String(),
+			Id:      uuid.New().String(),
 			Flow:    "xtls-rprx-vision",
 		},
 		ShortId: shortId,

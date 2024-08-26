@@ -39,12 +39,16 @@ func (s *LinuxOsService) GenerateShortId() (*string, error) {
 	return s.executor.GenerateShortId()
 }
 
+func (s *LinuxOsService) WriteServerConfig(serverConfig *models.ServerConfig) error {
+	return internal.WriteToFile(s.XrayConfigPath, &serverConfig)
+}
+
 func (s *LinuxOsService) WriteConfigs(
 	serverConfig *models.ServerConfig,
 	clientConfig *models.ClientConfig,
 	configIndex int,
 ) error {
-	err := internal.WriteToFile(s.XrayConfigPath, &serverConfig)
+	err := s.WriteServerConfig(serverConfig)
 	if err != nil {
 		return err
 	}

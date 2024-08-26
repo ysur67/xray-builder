@@ -29,7 +29,7 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 		Port:    443,
 		Users: []models.ClientUser{
 			{
-				ID:         client.Client.ID,
+				Id:         client.Client.Id,
 				Flow:       "xtls-rprx-vision",
 				Encryption: "none",
 				Comment:    client.Client.Comment,

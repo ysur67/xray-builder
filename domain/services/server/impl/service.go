@@ -41,19 +41,29 @@ func (s *ServerServiceImpl) SetDestinationAddress(cfg *models.ServerConfig, addr
 	first.StreamSettings.RealitySettings.ServerNames = []string{addr}
 }
 
-func (s *ServerServiceImpl) InflateServerConfig(
+func (s *ServerServiceImpl) SetupServer(
 	cfg *models.ServerConfig,
-	client *models.ClientDto,
 	keyPair *models.KeyPair,
 	destination string,
 ) {
-	s.AppendClient(cfg, client)
 	s.SetPrivateKey(cfg, keyPair)
 	s.SetDestinationAddress(cfg, destination)
 }
 
 func (s *ServerServiceImpl) GetUsers(cfg *models.ServerConfig) *[]models.Client {
 	return &cfg.FirstInbound().Settings.Clients
+}
+
+func (s *ServerServiceImpl) RemoveUser(cfg *models.ServerConfig, userIdOrComment string) *models.Client {
+	inbound := cfg.FirstInbound()
+	for i, user := range inbound.Settings.Clients {
+		if user.Comment == userIdOrComment || user.Id == userIdOrComment {
+			inbound.Settings.Clients = append(inbound.Settings.Clients[:i], inbound.Settings.Clients[i+1:]...)
+			return &user
+		}
+	}
+
+	return nil
 }
 
 func (s *ServerServiceImpl) ReadKeyPair(path string) (*models.KeyPair, error) {

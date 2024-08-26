@@ -14,10 +14,10 @@ import (
 	"github.com/alexflint/go-arg"
 )
 
-const InitialUserComment = "Initial user"
+const InitialUserComment = "initial-user"
 
-func sudoRequired() {
-	log.Fatalln("must be run as superuser")
+func sudoMaybeRequired() {
+	log.Println("Probably you need to run this command with sudo.")
 }
 
 func main() {
@@ -40,8 +40,7 @@ func main() {
 
 	if args.Setup != nil {
 		if !isSuperUser {
-			sudoRequired()
-			return
+			sudoMaybeRequired()
 		}
 
 		Setup(osService, args.Setup)
@@ -51,8 +50,7 @@ func main() {
 	if args.User != nil {
 		if args.User.Add != nil {
 			if !isSuperUser {
-				sudoRequired()
-				return
+				sudoMaybeRequired()
 			}
 
 			AddClient(osService, args.User.Add)
@@ -60,7 +58,16 @@ func main() {
 		}
 
 		if args.User.List != nil {
-			ListUsers(osService)
+			ListClients(osService)
+			return
+		}
+
+		if args.User.Remove != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			RemoveClient(osService, args.User.Remove)
 			return
 		}
 	}
@@ -99,7 +106,7 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 		panic(err)
 	}
 
-	serverService.InflateServerConfig(cfg, client, keyPair, args.Destination)
+	serverService.SetupServer(cfg, keyPair, args.Destination)
 	clientConfig, err := clientService.CreateClientConfig(cfg.ServerName(), client, keyPair)
 	if err != nil {
 		panic(err)
@@ -110,7 +117,7 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	}
 }
 
-func AddClient(osService *linuxService.LinuxOsService, args *models.AddArgs) {
+func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs) {
 	clientService := clientservice.New(osService)
 	serverService := serverservice.New()
 	serverConfig, err := serverService.ReadConfig(osService.XrayConfigPath)
@@ -142,7 +149,7 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.AddArgs) {
 	}
 }
 
-func ListUsers(osService *linuxService.LinuxOsService) {
+func ListClients(osService *linuxService.LinuxOsService) {
 	serverService := serverservice.New()
 	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
 	if err != nil {
@@ -156,4 +163,26 @@ func ListUsers(osService *linuxService.LinuxOsService) {
 	}
 
 	fmt.Println(string(result))
+}
+
+func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserRemoveArgs) {
+	serverService := serverservice.New()
+	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	user := serverService.RemoveUser(cfg, args.IdOrComment)
+	if user == nil {
+		log.Fatalln("user not found")
+		return
+	}
+
+	err = osService.WriteServerConfig(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	userJson, _ := json.MarshalIndent(user, "", "    ")
+	fmt.Println(string(userJson))
 }

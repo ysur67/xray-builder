@@ -7,16 +7,21 @@ type Args struct {
 	Verbose     bool       `arg:"-v,--verbose"`
 	User        *UserArgs  `arg:"subcommand:user" help:"user management"`
 	Setup       *SetupArgs `arg:"subcommand:setup" help:"install xray and generate configs"`
-	InstallMisc *struct{}  `arg:"subcommand:install-misc" help:"Install additional iptables and TCP BBR configuration, suppress ssh MOTD"`
+	InstallMisc *struct{}  `arg:"subcommand:install-misc" help:"Install additional iptables and TCP BBR configuration"`
 }
 
 type UserArgs struct {
-	Add  *AddArgs  `arg:"subcommand:add" help:"add user to xray config"`
-	List *struct{} `arg:"subcommand:list"`
+	Add    *UserAddArgs    `arg:"subcommand:add" help:"add user to xray config"`
+	Remove *UserRemoveArgs `arg:"subcommand:remove"`
+	List   *struct{}       `arg:"subcommand:list"`
 }
 
-type AddArgs struct {
+type UserAddArgs struct {
 	Comment string `arg:"positional,required" help:"Amount of users in generated config"`
+}
+
+type UserRemoveArgs struct {
+	IdOrComment string `arg:"positional,required" help:"Id or comment of removed user."`
 }
 
 type SetupArgs struct {
@@ -24,18 +29,6 @@ type SetupArgs struct {
 	InstallXray string `arg:"-i,--install-xray" placeholder:"1.8.1" help:"Install xray-core by version"`
 }
 
-func (SetupArgs) Description() string {
-	return `This script is used for installing, configuring
-			an xray-core and generating user configs for it`
-}
-func (SetupArgs) Epilogue() string {
-	return "For more information visit https://github.com/ysur67/xray-builder"
-}
-
-func (AddArgs) Description() string {
-	return `This script is used for installing, configuring
-			an xray-core and generating user configs for it`
-}
-func (AddArgs) Epilogue() string {
-	return "For more information visit https://github.com/ysur67/xray-builder"
+func (Args) Description() string {
+	return "Configure xray-core and manage users.\nhttps://github.com/ysur67/xray-builder\n"
 }
