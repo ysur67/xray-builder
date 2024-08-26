@@ -1,21 +1,29 @@
 package models
 
+type Args struct {
+	XrayConfigPath  string `arg:"-c,--config" default:"/usr/local/etc/xray/config.json"`
+	XrayKeypairPath string `arg:"-k,--keypair" default:"/usr/local/etc/xray/keypair.json"`
+
+	Verbose     bool       `arg:"-v,--verbose"`
+	Setup       *SetupArgs `arg:"subcommand:setup" help:"install xray and generate configs"`
+	InstallMisc *struct{}  `arg:"subcommand:install-misc" help:"Install additional iptables and TCP BBR configuration, suppress ssh MOTD"`
+	Add         *AddArgs   `arg:"subcommand:add" help:"add user to xray config"`
+}
+
 type AddArgs struct {
-	Add int `arg:"-u, --users required" help:"Amount of users in generated config"`
+	Comment string `arg:"positional,required" help:"Amount of users in generated config"`
 }
 
-type InstallArgs struct {
+type SetupArgs struct {
 	Destination string `arg:"-d,--destination required" placeholder:"rkn.gov.ru/" help:"destination and serverName in xray server config"`
-	InstallXray string `arg:"-i,--install-xray" placeholder:"1.8.1" help:"Is installation of xray-core reguired, also you need to specify the version"`
-	UsersCount  int    `arg:"-u, --users" help:"Amount of users in generated config"`
-	InstallMisc bool   `arg:"-m,--misc" help:"Additional iptables and TCP BBR configuration, see README.md for additional information"`
+	InstallXray string `arg:"-i,--install-xray" placeholder:"1.8.1" help:"Install xray-core by version"`
 }
 
-func (InstallArgs) Description() string {
+func (SetupArgs) Description() string {
 	return `This script is used for installing, configuring
 			an xray-core and generating user configs for it`
 }
-func (InstallArgs) Epilogue() string {
+func (SetupArgs) Epilogue() string {
 	return "For more information visit https://github.com/ysur67/xray-builder"
 }
 

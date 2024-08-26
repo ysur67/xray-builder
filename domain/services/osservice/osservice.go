@@ -7,13 +7,14 @@ import (
 type OsService interface {
 	GenerateKeyPair() (*models.KeyPair, error)
 	DownloadAndInstallXray(version string) error
-	GetServerAddr() (*string, error)
+	GetServerAddr() (string, error)
 	GenerateShortId() (*string, error)
-	WriteConfigs(serverConfig *models.ServerConfig, clientConfigs *[]models.ClientConfig, clientStartIndex int)
+	WriteConfigs(
+		serverConfig *models.ServerConfig,
+		clientConfig *models.ClientConfig,
+		clientIndex int,
+	) error
 	SaveKeyPair(pair *models.KeyPair) error
 	RestartXray() error
-	SuppressLoginMessage() error
-	ApplyIptablesRules() error
-	EnableTcpBBR() error
 	IsSuperUser() (bool, error)
 }

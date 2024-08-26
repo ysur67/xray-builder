@@ -8,7 +8,4 @@ type CmdExecutor interface {
 	GenerateShortId() (*string, error)
 	GetServerAddr() (*string, error)
 	RestartXray() error
-	SuppressLoginMessage() error
-	ApplyIptablesRules() error
-	EnableTcpBBR() error
 }

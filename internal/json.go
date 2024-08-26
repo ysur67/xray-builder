@@ -2,15 +2,16 @@ package internal
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io/fs"
+	"os"
 )
 
 func ReadJson[T any](path string, obj *T) error {
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal([]byte(file), obj)
+	err = json.Unmarshal(file, obj)
 	if err != nil {
 		return err
 	}
@@ -18,6 +19,7 @@ func ReadJson[T any](path string, obj *T) error {
 }
 
 func WriteToFile[T any](path string, obj *T) error {
-	result, _ := json.Marshal(obj)
-	return ioutil.WriteFile(path, result, 0644)
+	result, _ := json.MarshalIndent(obj, "", "    ")
+	result = append(result, '\n')
+	return os.WriteFile(path, result, fs.FileMode(0644))
 }

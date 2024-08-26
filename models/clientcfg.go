@@ -64,6 +64,7 @@ type ClientUser struct {
 	ID         string `json:"id"`
 	Flow       string `json:"flow"`
 	Encryption string `json:"encryption"`
+	Comment    string `json:"comment"`
 }
 
 func (c *ClientConfig) FirstOutbound() *ClientOutbound {
