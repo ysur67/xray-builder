@@ -28,4 +28,5 @@ xraybuilder
 /server.template.json
 /client.template.json
 /client*.json
-/config.json
+/config*.json
+/keypair*.json

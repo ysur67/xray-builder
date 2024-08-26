@@ -11,6 +11,3 @@ func RootDir() string {
 	d := path.Join(path.Dir(b))
 	return filepath.Dir(d)
 }
-
-const LinuxConfigPath = "/usr/local/etc/xray/config.json"
-const LinuxKeyPairPath = "/usr/local/etc/xray/keypair.json"

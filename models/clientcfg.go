@@ -61,9 +61,10 @@ type ClientVnext struct {
 }
 
 type ClientUser struct {
-	ID         string `json:"id"`
+	Id         string `json:"id"`
 	Flow       string `json:"flow"`
 	Encryption string `json:"encryption"`
+	Comment    string `json:"comment"`
 }
 
 func (c *ClientConfig) FirstOutbound() *ClientOutbound {

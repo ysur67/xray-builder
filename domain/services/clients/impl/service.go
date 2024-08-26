@@ -10,16 +10,12 @@ type ClientCfgServiceImpl struct {
 	svc osservice.OsService
 }
 
-func (b *ClientCfgServiceImpl) CreateClients(count int) (*[]models.ClientDto, error) {
-	result := make([]models.ClientDto, count)
-	for ind := 0; ind < count; ind++ {
-		shortId, err := b.svc.GenerateShortId()
-		if err != nil {
-			return &result, err
-		}
-		result[ind] = *models.NewClient(*shortId)
+func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.ClientDto, error) {
+	shortId, err := b.svc.GenerateShortId()
+	if err != nil {
+		return nil, err
 	}
-	return &result, nil
+	return models.NewClient(*shortId, comment), nil
 }
 
 func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.ClientDto, keyPair *models.KeyPair) (*models.ClientConfig, error) {
@@ -29,13 +25,14 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 	first := clientConfig.FirstOutbound()
 	vnext := make([]models.ClientVnext, 1)
 	vnext[0] = models.ClientVnext{
-		Address: *serverAddr,
+		Address: serverAddr,
 		Port:    443,
 		Users: []models.ClientUser{
 			{
-				ID:         client.Client.ID,
+				Id:         client.Client.Id,
 				Flow:       "xtls-rprx-vision",
 				Encryption: "none",
+				Comment:    client.Client.Comment,
 			},
 		},
 	}
@@ -58,6 +55,6 @@ func (b *ClientCfgServiceImpl) CreateMultipleConfigs(serverName string, clients 
 	return &result, nil
 }
 
-func NewClientCfgServiceImpl(svc osservice.OsService) *ClientCfgServiceImpl {
-	return &ClientCfgServiceImpl{svc: svc}
+func New(svc osservice.OsService) *ClientCfgServiceImpl {
+	return &ClientCfgServiceImpl{svc}
 }

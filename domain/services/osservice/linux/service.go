@@ -9,7 +9,9 @@ import (
 )
 
 type LinuxOsService struct {
-	executor commands.CmdExecutor
+	XrayConfigPath  string
+	XrayKeypairPath string
+	executor        commands.CmdExecutor
 }
 
 func (s *LinuxOsService) GenerateKeyPair() (*models.KeyPair, error) {
@@ -20,28 +22,48 @@ func (s *LinuxOsService) DownloadAndInstallXray(version string) error {
 	return s.executor.DownloadAndInstallXray(version)
 }
 
-func (s *LinuxOsService) GetServerAddr() (*string, error) {
-	return s.executor.GetServerAddr()
+func derefString(s *string) string {
+	if s != nil {
+		return *s
+	}
+
+	return ""
+}
+
+func (s *LinuxOsService) GetServerAddr() (string, error) {
+	addr, err := s.executor.GetServerAddr()
+	return derefString(addr), err
 }
 
 func (s *LinuxOsService) GenerateShortId() (*string, error) {
 	return s.executor.GenerateShortId()
 }
 
+func (s *LinuxOsService) WriteServerConfig(serverConfig *models.ServerConfig) error {
+	return internal.WriteToFile(s.XrayConfigPath, &serverConfig)
+}
+
 func (s *LinuxOsService) WriteConfigs(
 	serverConfig *models.ServerConfig,
-	clientConfigs *[]models.ClientConfig,
-	clientStartIndex int,
-) {
-	internal.WriteToFile(internal.LinuxConfigPath, &serverConfig)
-	for ind, elem := range *clientConfigs {
-		configIndex := clientStartIndex + ind
-		internal.WriteToFile(fmt.Sprintf("client%v.json", configIndex), &elem)
+	clientConfig *models.ClientConfig,
+	configIndex int,
+) error {
+	err := s.WriteServerConfig(serverConfig)
+	if err != nil {
+		return err
 	}
+
+	fname := fmt.Sprintf("client%v.json", configIndex)
+	err = internal.WriteToFile(fname, clientConfig)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *LinuxOsService) SaveKeyPair(pair *models.KeyPair) error {
-	if err := internal.WriteToFile(internal.LinuxKeyPairPath, &pair); err != nil {
+	if err := internal.WriteToFile(s.XrayKeypairPath, &pair); err != nil {
 		return err
 	}
 	return nil
@@ -49,18 +71,6 @@ func (s *LinuxOsService) SaveKeyPair(pair *models.KeyPair) error {
 
 func (s *LinuxOsService) RestartXray() error {
 	return s.executor.RestartXray()
-}
-
-func (s *LinuxOsService) SuppressLoginMessage() error {
-	return s.executor.SuppressLoginMessage()
-}
-
-func (s *LinuxOsService) ApplyIptablesRules() error {
-	return s.executor.ApplyIptablesRules()
-}
-
-func (s *LinuxOsService) EnableTcpBBR() error {
-	return s.executor.EnableTcpBBR()
 }
 
 func (s *LinuxOsService) IsSuperUser() (bool, error) {
@@ -71,6 +81,10 @@ func (s *LinuxOsService) IsSuperUser() (bool, error) {
 	return currentUser.Username == "root", nil
 }
 
-func NewLinuxOsService(executor commands.CmdExecutor) *LinuxOsService {
-	return &LinuxOsService{executor: executor}
+func New(xrayConfigPath string, xrayKeypairPath string, executor commands.CmdExecutor) *LinuxOsService {
+	return &LinuxOsService{
+		XrayConfigPath:  xrayConfigPath,
+		XrayKeypairPath: xrayKeypairPath,
+		executor:        executor,
+	}
 }

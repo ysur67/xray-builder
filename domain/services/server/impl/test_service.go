@@ -16,32 +16,25 @@ func service() *ServerServiceImpl {
 	return &ServerServiceImpl{}
 }
 
-func TestEmptyAppend(t *testing.T) {
-	cfg := config()
-	svc := service()
-	var clients []models.ClientDto
-	svc.AppendClients(cfg, &clients, &cfg.Inbounds[0].StreamSettings)
-	if len(cfg.Inbounds[0].Settings.Clients) != 0 {
-		t.Error("Expected no clients found", len(cfg.Inbounds))
-	}
-}
-
 func TestAppend(t *testing.T) {
+	const ClientsCount = 5
+
 	cfg := config()
 	svc := service()
-	clients := make([]models.ClientDto, 5)
-	for ind := 0; ind < len(clients); ind++ {
-		clients[ind] = models.ClientDto{
+
+	for ind := 0; ind < ClientsCount; ind++ {
+		client := models.ClientDto{
 			Client: models.Client{
-				ID:   "asdfadsfd",
+				Id:   "asdfadsfd",
 				Flow: "asdfasdfdsa",
 			},
 			ShortId: "jopajopajopa",
 		}
+
+		svc.AppendClient(cfg, &client)
 	}
-	svc.AppendClients(cfg, &clients, &cfg.Inbounds[0].StreamSettings)
-	if len(cfg.Inbounds[0].Settings.Clients) != len(clients) {
-		t.Errorf("Expected %v clients found %v", len(clients), len(cfg.Inbounds[0].Settings.Clients))
+	if len(cfg.Inbounds[0].Settings.Clients) != ClientsCount {
+		t.Errorf("Expected %v clients found %v", ClientsCount, len(cfg.Inbounds[0].Settings.Clients))
 	}
 }
 

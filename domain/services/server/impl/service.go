@@ -19,20 +19,13 @@ func (s *ServerServiceImpl) ReadConfig(path string) (*models.ServerConfig, error
 	return &config, nil
 }
 
-func (s *ServerServiceImpl) AppendClients(
+func (s *ServerServiceImpl) AppendClient(
 	cfg *models.ServerConfig,
-	clients *[]models.ClientDto,
-	streamSettings *models.StreamSettingsObject,
+	client *models.ClientDto,
 ) {
-	serverClients := make([]models.Client, len(*clients))
-	shortIds := make([]string, len(*clients))
-	for ind, elem := range *clients {
-		serverClients[ind] = elem.Client
-		shortIds[ind] = elem.ShortId
-	}
-	first := cfg.FirstInbound()
-	first.Settings.Clients = append(first.Settings.Clients, serverClients...)
-	first.StreamSettings.RealitySettings.ShortIds = append(first.StreamSettings.RealitySettings.ShortIds, shortIds...)
+	inbound := cfg.FirstInbound()
+	inbound.Settings.Clients = append(inbound.Settings.Clients, client.Client)
+	inbound.StreamSettings.RealitySettings.ShortIds = append(inbound.StreamSettings.RealitySettings.ShortIds, client.ShortId)
 }
 
 func (s *ServerServiceImpl) SetPrivateKey(
@@ -48,18 +41,29 @@ func (s *ServerServiceImpl) SetDestinationAddress(cfg *models.ServerConfig, addr
 	first.StreamSettings.RealitySettings.ServerNames = []string{addr}
 }
 
-func (s *ServerServiceImpl) InflateServerConfig(cfg *models.ServerConfig, clients *[]models.ClientDto, keyPair *models.KeyPair, destination string) {
-	s.AppendClients(
-		cfg,
-		clients,
-		&cfg.FirstInbound().StreamSettings,
-	)
+func (s *ServerServiceImpl) SetupServer(
+	cfg *models.ServerConfig,
+	keyPair *models.KeyPair,
+	destination string,
+) {
 	s.SetPrivateKey(cfg, keyPair)
 	s.SetDestinationAddress(cfg, destination)
 }
 
-func (s *ServerServiceImpl) CurrentUsers(cfg *models.ServerConfig) int {
-	return len(cfg.FirstInbound().Settings.Clients)
+func (s *ServerServiceImpl) GetUsers(cfg *models.ServerConfig) *[]models.Client {
+	return &cfg.FirstInbound().Settings.Clients
+}
+
+func (s *ServerServiceImpl) RemoveUser(cfg *models.ServerConfig, userIdOrComment string) *models.Client {
+	inbound := cfg.FirstInbound()
+	for i, user := range inbound.Settings.Clients {
+		if user.Comment == userIdOrComment || user.Id == userIdOrComment {
+			inbound.Settings.Clients = append(inbound.Settings.Clients[:i], inbound.Settings.Clients[i+1:]...)
+			return &user
+		}
+	}
+
+	return nil
 }
 
 func (s *ServerServiceImpl) ReadKeyPair(path string) (*models.KeyPair, error) {
@@ -70,6 +74,6 @@ func (s *ServerServiceImpl) ReadKeyPair(path string) (*models.KeyPair, error) {
 	return &result, nil
 }
 
-func NewServerServiceImpl() *ServerServiceImpl {
+func New() *ServerServiceImpl {
 	return &ServerServiceImpl{}
 }

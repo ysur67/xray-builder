@@ -8,12 +8,14 @@ import (
 	"xraybuilder/models"
 )
 
-const ShellToUse = "bash"
+const ShellPath = "/usr/bin/sh"
 
-type BashCmdExecutor struct{}
+type BashCmdExecutor struct {
+	verbose bool
+}
 
 func (b *BashCmdExecutor) GenerateKeyPair() (*models.KeyPair, error) {
-	out, _, err := shellout("xray x25519")
+	out, _, err := b.Shell("xray x25519")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +31,7 @@ func (b *BashCmdExecutor) DownloadAndInstallXray(version string) error {
 		`bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u root --version %s`,
 		version,
 	)
-	out, _, err := shellout(cmd)
+	out, _, err := b.Shell(cmd)
 	if err != nil {
 		return err
 	}
@@ -38,7 +40,7 @@ func (b *BashCmdExecutor) DownloadAndInstallXray(version string) error {
 }
 
 func (b *BashCmdExecutor) GenerateShortId() (*string, error) {
-	out, _, err := shellout("openssl rand -hex 8")
+	out, _, err := b.Shell("openssl rand -hex 8")
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,7 @@ func (b *BashCmdExecutor) GenerateShortId() (*string, error) {
 }
 
 func (b *BashCmdExecutor) GetServerAddr() (*string, error) {
-	out, _, err := shellout("hostname -I")
+	out, _, err := b.Shell("hostname -I")
 	if err != nil {
 		return nil, err
 	}
@@ -56,71 +58,25 @@ func (b *BashCmdExecutor) GetServerAddr() (*string, error) {
 }
 
 func (b *BashCmdExecutor) RestartXray() error {
-	_, _, err := shellout("systemctl restart xray")
+	_, _, err := b.Shell("systemctl restart xray")
 	return err
 }
 
-func shellout(command string) (string, string, error) {
+func (b *BashCmdExecutor) Shell(command string) (string, string, error) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd := exec.Command(ShellToUse, "-c", command)
+	cmd := exec.Command(ShellPath, "-c", command)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
+
+	if b.verbose {
+		fmt.Println(stdout.String(), stderr.String(), err)
+	}
+
 	return stdout.String(), stderr.String(), err
 }
 
-func (b *BashCmdExecutor) SuppressLoginMessage() error {
-	_, _, err := shellout("touch ~/.hushlogin")
-	return err
-}
-
-func (b *BashCmdExecutor) ApplyIptablesRules() error {
-	cmds := [...]string{
-		"iptables -A INPUT -i lo -j ACCEPT",
-		"iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT",
-		"iptables -A INPUT -p icmp -j ACCEPT",
-		"iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT",
-		"iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT",
-		"iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
-		"iptables -A INPUT -p tcp --dport 443 -j ACCEPT",
-		"iptables -P INPUT DROP",
-		"ip6tables -A INPUT -i lo -j ACCEPT",
-		"ip6tables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT",
-		"ip6tables -A INPUT -p ipv6-icmp -j ACCEPT",
-		"ip6tables -P INPUT DROP",
-		"apt install iptables-persistent -y",
-	}
-	for _, el := range cmds {
-		out, _, err := shellout(el)
-		if err != nil {
-			return err
-		}
-		if out != "" {
-			fmt.Println(out)
-		}
-	}
-	return nil
-}
-
-func (b *BashCmdExecutor) EnableTcpBBR() error {
-	stdout, stderr, err := shellout(`
-	echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf;
-	echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf;
-	sysctl -p;
-	`)
-	if err != nil {
-		return err
-	}
-	if stderr != "" {
-		fmt.Println(stderr)
-	}
-	if stdout != "" {
-		fmt.Println(stderr)
-	}
-	return nil
-}
-
-func NewBashExecutor() *BashCmdExecutor {
-	return &BashCmdExecutor{}
+func New(verbose bool) *BashCmdExecutor {
+	return &BashCmdExecutor{verbose}
 }

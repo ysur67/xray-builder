@@ -19,8 +19,12 @@ type InboudSettings struct {
 }
 
 type Client struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Flow string `json:"flow"`
+
+	// Comment for the user.
+	// Field name `email` is for compatibility with 3x-ui.
+	Comment string `json:"email"`
 }
 
 type RealitySettingsObject struct {
@@ -95,11 +99,12 @@ type ClientDto struct {
 	ShortId string
 }
 
-func NewClient(shortId string) *ClientDto {
+func NewClient(shortId string, comment string) *ClientDto {
 	return &ClientDto{
 		Client: Client{
-			ID:   uuid.New().String(),
-			Flow: "xtls-rprx-vision",
+			Comment: comment,
+			Id:      uuid.New().String(),
+			Flow:    "xtls-rprx-vision",
 		},
 		ShortId: shortId,
 	}

@@ -1,67 +1,83 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"os"
-	"xraybuilder/internal"
+	"log"
 	"xraybuilder/models"
 
 	bashexecutor "xraybuilder/domain/commands/bash"
 	clientservice "xraybuilder/domain/services/clients/impl"
-	"xraybuilder/domain/services/osservice/linux"
+	linuxService "xraybuilder/domain/services/osservice/linux"
 	serverservice "xraybuilder/domain/services/server/impl"
 
 	"github.com/alexflint/go-arg"
 )
 
-func main() {
-	mode := os.Args[1]
-	os.Args = internal.RemoveByIndex(os.Args, 1)
-	if mode == "create" {
-		RunInstall()
-		return
-	}
+const InitialUserComment = "initial-user"
 
-	if mode == "add" {
-		AddClients()
-		return
-	}
-
-	fmt.Println(`Select one of the commands "add" or "create".`)
+func sudoMaybeRequired() {
+	log.Println("Probably you need to run this command with sudo.")
 }
 
-func RunInstall() {
-	var args models.InstallArgs
-	arg.MustParse(&args)
+func main() {
+	var args models.Args
+	argParser := arg.MustParse(&args)
 
-	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
-	clientService := clientservice.NewClientCfgServiceImpl(osService)
-	serverService := serverservice.NewServerServiceImpl()
+	cmdExecutor := bashexecutor.New(args.Verbose)
 
+	if args.InstallMisc != nil {
+		cmdExecutor.Shell("chmod +x shell/iptables.sh; shell/iptables.sh")
+		cmdExecutor.Shell("chmod +x shell/enable-tcp-bbr.sh; shell/enable-tcp-bbr.sh")
+		return
+	}
+
+	osService := linuxService.New(args.XrayConfigPath, args.XrayKeypairPath, cmdExecutor)
 	isSuperUser, err := osService.IsSuperUser()
 	if err != nil {
 		panic(err)
 	}
 
-	if !isSuperUser {
-		fmt.Println("Must be run as superuser")
+	if args.Setup != nil {
+		if !isSuperUser {
+			sudoMaybeRequired()
+		}
+
+		Setup(osService, args.Setup)
 		return
 	}
 
-	if args.InstallMisc {
-		err := osService.SuppressLoginMessage()
-		if err != nil {
-			panic(err)
+	if args.User != nil {
+		if args.User.Add != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			AddClient(osService, args.User.Add)
+			return
 		}
-		err = osService.ApplyIptablesRules()
-		if err != nil {
-			panic(err)
+
+		if args.User.List != nil {
+			ListClients(osService)
+			return
 		}
-		err = osService.EnableTcpBBR()
-		if err != nil {
-			panic(err)
+
+		if args.User.Remove != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			RemoveClient(osService, args.User.Remove)
+			return
 		}
 	}
+
+	argParser.WriteHelp(log.Writer())
+}
+
+func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
+	clientService := clientservice.New(osService)
+	serverService := serverservice.New()
 
 	if args.InstallXray != "" {
 		err := osService.DownloadAndInstallXray(args.InstallXray)
@@ -69,72 +85,104 @@ func RunInstall() {
 			panic(err)
 		}
 	}
+
 	cfg, err := serverService.ReadConfig("")
 	if err != nil {
 		panic(err)
 	}
+
 	keyPair, err := osService.GenerateKeyPair()
 	if err != nil {
 		panic(err)
 	}
-	if err = osService.SaveKeyPair(keyPair); err != nil {
-		panic(err)
-	}
-	clients, err := clientService.CreateClients(args.UsersCount)
+
+	err = osService.SaveKeyPair(keyPair)
 	if err != nil {
 		panic(err)
 	}
-	serverService.InflateServerConfig(cfg, clients, keyPair, args.Destination)
-	clientConfigs, err := clientService.CreateMultipleConfigs(cfg.ServerName(), clients, keyPair)
+
+	client, err := clientService.CreateClient(InitialUserComment)
 	if err != nil {
 		panic(err)
 	}
-	osService.WriteConfigs(cfg, clientConfigs, 0)
+
+	serverService.SetupServer(cfg, keyPair, args.Destination)
+	clientConfig, err := clientService.CreateClientConfig(cfg.ServerName(), client, keyPair)
+	if err != nil {
+		panic(err)
+	}
+	osService.WriteConfigs(cfg, clientConfig, 0)
 	if err = osService.RestartXray(); err != nil {
 		panic(err)
 	}
 }
 
-func AddClients() {
-	var args models.AddArgs
-	arg.MustParse(&args)
+func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs) {
+	clientService := clientservice.New(osService)
+	serverService := serverservice.New()
+	serverConfig, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	client, err := clientService.CreateClient(args.Comment)
+	if err != nil {
+		panic(err)
+	}
+	serverService.AppendClient(serverConfig, client)
+	keyPair, err := serverService.ReadKeyPair(osService.XrayKeypairPath)
+	if err != nil {
+		panic(err)
+	}
 
-	if args.Add < 1 {
-		fmt.Println("The number of users must be greater than 0")
+	clientConfig, err := clientService.CreateClientConfig(serverConfig.ServerName(), client, keyPair)
+	if err != nil {
+		panic(err)
+	}
+
+	err = osService.WriteConfigs(
+		serverConfig,
+		clientConfig,
+		len(*serverService.GetUsers(serverConfig)),
+	)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ListClients(osService *linuxService.LinuxOsService) {
+	serverService := serverservice.New()
+	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	users := serverService.GetUsers(cfg)
+	result, err := json.MarshalIndent(users, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(result))
+}
+
+func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserRemoveArgs) {
+	serverService := serverservice.New()
+	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	user := serverService.RemoveUser(cfg, args.IdOrComment)
+	if user == nil {
+		log.Fatalln("user not found")
 		return
 	}
 
-	osService := linux.NewLinuxOsService(bashexecutor.NewBashExecutor())
-
-	isSuperUser, err := osService.IsSuperUser()
+	err = osService.WriteServerConfig(cfg)
 	if err != nil {
 		panic(err)
 	}
 
-	if !isSuperUser {
-		fmt.Println("Must be run as superuser")
-		return
-	}
-
-	clientService := clientservice.NewClientCfgServiceImpl(osService)
-	serverService := serverservice.NewServerServiceImpl()
-	serverConfig, err := serverService.ReadConfig(internal.LinuxConfigPath)
-	if err != nil {
-		panic(err)
-	}
-	usersCount := serverService.CurrentUsers(serverConfig)
-	clients, err := clientService.CreateClients(args.Add)
-	if err != nil {
-		panic(err)
-	}
-	serverService.AppendClients(serverConfig, clients, &serverConfig.FirstInbound().StreamSettings)
-	keyPair, err := serverService.ReadKeyPair(internal.LinuxKeyPairPath)
-	if err != nil {
-		panic(err)
-	}
-	clientConfigs, err := clientService.CreateMultipleConfigs(serverConfig.ServerName(), clients, keyPair)
-	if err != nil {
-		panic(err)
-	}
-	osService.WriteConfigs(serverConfig, clientConfigs, usersCount)
+	userJson, _ := json.MarshalIndent(user, "", "    ")
+	fmt.Println(string(userJson))
 }
