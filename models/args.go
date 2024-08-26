@@ -5,9 +5,14 @@ type Args struct {
 	XrayKeypairPath string `arg:"-k,--keypair" default:"/usr/local/etc/xray/keypair.json"`
 
 	Verbose     bool       `arg:"-v,--verbose"`
+	User        *UserArgs  `arg:"subcommand:user" help:"user management"`
 	Setup       *SetupArgs `arg:"subcommand:setup" help:"install xray and generate configs"`
 	InstallMisc *struct{}  `arg:"subcommand:install-misc" help:"Install additional iptables and TCP BBR configuration, suppress ssh MOTD"`
-	Add         *AddArgs   `arg:"subcommand:add" help:"add user to xray config"`
+}
+
+type UserArgs struct {
+	Add  *AddArgs  `arg:"subcommand:add" help:"add user to xray config"`
+	List *struct{} `arg:"subcommand:list"`
 }
 
 type AddArgs struct {

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"xraybuilder/models"
 
@@ -14,41 +16,53 @@ import (
 
 const InitialUserComment = "Initial user"
 
+func sudoRequired() {
+	log.Fatalln("must be run as superuser")
+}
+
 func main() {
 	var args models.Args
 	argParser := arg.MustParse(&args)
 
 	cmdExecutor := bashexecutor.New(args.Verbose)
-	osService := linuxService.New(args.XrayConfigPath, args.XrayKeypairPath, cmdExecutor)
-
-	isSuperUser, err := osService.IsSuperUser()
-	if err != nil {
-		panic(err)
-	}
-
-	if !isSuperUser {
-		log.Fatalln("must be run as superuser")
-		return
-	}
-
-	if args.Setup != nil {
-		Setup(osService, args.Setup)
-		return
-	}
-
-	if args.Add != nil {
-		err := AddClient(osService, args.Add)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		return
-	}
 
 	if args.InstallMisc != nil {
 		cmdExecutor.Shell("chmod +x shell/iptables.sh; shell/iptables.sh")
 		cmdExecutor.Shell("chmod +x shell/enable-tcp-bbr.sh; shell/enable-tcp-bbr.sh")
 		return
+	}
+
+	osService := linuxService.New(args.XrayConfigPath, args.XrayKeypairPath, cmdExecutor)
+	isSuperUser, err := osService.IsSuperUser()
+	if err != nil {
+		panic(err)
+	}
+
+	if args.Setup != nil {
+		if !isSuperUser {
+			sudoRequired()
+			return
+		}
+
+		Setup(osService, args.Setup)
+		return
+	}
+
+	if args.User != nil {
+		if args.User.Add != nil {
+			if !isSuperUser {
+				sudoRequired()
+				return
+			}
+
+			AddClient(osService, args.User.Add)
+			return
+		}
+
+		if args.User.List != nil {
+			ListUsers(osService)
+			return
+		}
 	}
 
 	argParser.WriteHelp(log.Writer())
@@ -96,7 +110,7 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	}
 }
 
-func AddClient(osService *linuxService.LinuxOsService, args *models.AddArgs) error {
+func AddClient(osService *linuxService.LinuxOsService, args *models.AddArgs) {
 	clientService := clientservice.New(osService)
 	serverService := serverservice.New()
 	serverConfig, err := serverService.ReadConfig(osService.XrayConfigPath)
@@ -121,11 +135,25 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.AddArgs) err
 	err = osService.WriteConfigs(
 		serverConfig,
 		clientConfig,
-		serverService.CurrentUsers(serverConfig),
+		len(*serverService.GetUsers(serverConfig)),
 	)
 	if err != nil {
 		panic(err)
 	}
+}
 
-	return nil
+func ListUsers(osService *linuxService.LinuxOsService) {
+	serverService := serverservice.New()
+	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	users := serverService.GetUsers(cfg)
+	result, err := json.MarshalIndent(users, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(result))
 }

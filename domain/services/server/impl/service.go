@@ -52,8 +52,8 @@ func (s *ServerServiceImpl) InflateServerConfig(
 	s.SetDestinationAddress(cfg, destination)
 }
 
-func (s *ServerServiceImpl) CurrentUsers(cfg *models.ServerConfig) int {
-	return len(cfg.FirstInbound().Settings.Clients)
+func (s *ServerServiceImpl) GetUsers(cfg *models.ServerConfig) *[]models.Client {
+	return &cfg.FirstInbound().Settings.Clients
 }
 
 func (s *ServerServiceImpl) ReadKeyPair(path string) (*models.KeyPair, error) {
