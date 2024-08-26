@@ -16,16 +16,6 @@ func service() *ServerServiceImpl {
 	return &ServerServiceImpl{}
 }
 
-// func TestEmptyAppend(t *testing.T) {
-// 	cfg := config()
-// 	svc := service()
-// 	var clients []models.ClientDto
-// 	svc.AppendClient(cfg, &clients, &cfg.Inbounds[0].StreamSettings)
-// 	if len(cfg.Inbounds[0].Settings.Clients) != 0 {
-// 		t.Error("Expected no clients found", len(cfg.Inbounds))
-// 	}
-// }
-
 func TestAppend(t *testing.T) {
 	const ClientsCount = 5
 
