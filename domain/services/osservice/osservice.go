@@ -9,11 +9,7 @@ type OsService interface {
 	DownloadAndInstallXray(version string) error
 	GetServerAddr() (string, error)
 	GenerateShortId() (*string, error)
-	WriteConfigs(
-		serverConfig *models.ServerConfig,
-		clientConfig *models.ClientConfig,
-		clientConfigSuffix string,
-	) error
+	WriteServerConfig(serverConfig *models.ServerConfig) error
 	SaveKeyPair(pair *models.KeyPair) error
 	RestartXray() error
 	IsSuperUser() (bool, error)

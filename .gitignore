@@ -30,3 +30,4 @@ xraybuilder
 /client*.json
 /config*.json
 /keypair*.json
+/server*.json

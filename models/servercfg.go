@@ -13,7 +13,7 @@ type Rule struct {
 	Ip          *[]string `json:"ip,omitempty"`
 }
 
-type InboudSettings struct {
+type InboundSettings struct {
 	Clients    []Client `json:"clients"`
 	Decryption string   `json:"decryption"`
 }
@@ -21,6 +21,9 @@ type InboudSettings struct {
 type Client struct {
 	Id   string `json:"id"`
 	Flow string `json:"flow"`
+
+	// Used to identify client in the `realitySettings.shortIds`.
+	ShortId string `json:"shortId"`
 
 	// Comment for the user.
 	// Field name `email` is for compatibility with 3x-ui.
@@ -54,7 +57,7 @@ type Inbound struct {
 	Listen         string               `json:"listen"`
 	Port           int                  `json:"port"`
 	Protocol       string               `json:"protocol"`
-	Settings       InboudSettings       `json:"settings"`
+	Settings       InboundSettings      `json:"settings"`
 	StreamSettings StreamSettingsObject `json:"streamSettings"`
 	Sniffing       SniffingObject       `json:"sniffing"`
 }
@@ -81,7 +84,7 @@ type PolicyObject struct {
 type ServerConfig struct {
 	Log       LogObject     `json:"log"`
 	Routing   RoutingObject `json:"routing"`
-	OutBounds []Outbound    `json:"outbounds"`
+	Outbounds []Outbound    `json:"outbounds"`
 	Policy    PolicyObject  `json:"policy"`
 	Inbounds  []Inbound     `json:"inbounds"`
 }
@@ -94,18 +97,11 @@ func (s *ServerConfig) ServerName() string {
 	return s.FirstInbound().StreamSettings.RealitySettings.ServerNames[0]
 }
 
-type ClientDto struct {
-	Client  Client
-	ShortId string
-}
-
-func NewClient(shortId string, comment string) *ClientDto {
-	return &ClientDto{
-		Client: Client{
-			Comment: comment,
-			Id:      uuid.New().String(),
-			Flow:    "xtls-rprx-vision",
-		},
+func NewClient(shortId string, comment string) *Client {
+	return &Client{
+		Comment: comment,
 		ShortId: shortId,
+		Id:      uuid.New().String(),
+		Flow:    "xtls-rprx-vision",
 	}
 }

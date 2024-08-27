@@ -12,8 +12,8 @@ func config() *models.ServerConfig {
 	return &result
 }
 
-func service() *ServerServiceImpl {
-	return &ServerServiceImpl{}
+func service() *ServerService {
+	return &ServerService{}
 }
 
 func TestAppend(t *testing.T) {
@@ -23,12 +23,11 @@ func TestAppend(t *testing.T) {
 	svc := service()
 
 	for ind := 0; ind < ClientsCount; ind++ {
-		client := models.ClientDto{
-			Client: models.Client{
-				Id:   "asdfadsfd",
-				Flow: "asdfasdfdsa",
-			},
+		client := models.Client{
+			Id:      "asdfadsfd",
+			Flow:    "asdfasdfdsa",
 			ShortId: "jopajopajopa",
+			Comment: "some-comment",
 		}
 
 		svc.AppendClient(cfg, &client)

@@ -10,7 +10,7 @@ type ClientCfgServiceImpl struct {
 	svc osservice.OsService
 }
 
-func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.ClientDto, error) {
+func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.Client, error) {
 	shortId, err := b.svc.GenerateShortId()
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.ClientDto, 
 	return models.NewClient(*shortId, comment), nil
 }
 
-func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.ClientDto, keyPair *models.KeyPair) (*models.ClientConfig, error) {
+func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.Client, keyPair *models.KeyPair) (*models.ClientConfig, error) {
 	clientConfig := models.ClientConfig{}
 	internal.ReadJson("configs/client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
@@ -29,10 +29,10 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 		Port:    443,
 		Users: []models.ClientUser{
 			{
-				Id:         client.Client.Id,
+				Id:         client.Id,
 				Flow:       "xtls-rprx-vision",
 				Encryption: "none",
-				Comment:    client.Client.Comment,
+				Comment:    client.Comment,
 			},
 		},
 	}
