@@ -12,7 +12,7 @@ type OsService interface {
 	WriteConfigs(
 		serverConfig *models.ServerConfig,
 		clientConfig *models.ClientConfig,
-		clientIndex int,
+		clientConfigSuffix string,
 	) error
 	SaveKeyPair(pair *models.KeyPair) error
 	RestartXray() error

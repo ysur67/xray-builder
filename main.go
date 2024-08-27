@@ -130,7 +130,7 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs)
 	err = osService.WriteConfigs(
 		serverConfig,
 		clientConfig,
-		len(*serverService.GetUsers(serverConfig)),
+		client.Client.Comment,
 	)
 	if err != nil {
 		panic(err)

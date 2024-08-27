@@ -46,14 +46,14 @@ func (s *LinuxOsService) WriteServerConfig(serverConfig *models.ServerConfig) er
 func (s *LinuxOsService) WriteConfigs(
 	serverConfig *models.ServerConfig,
 	clientConfig *models.ClientConfig,
-	configIndex int,
+	clientConfigSuffix string,
 ) error {
 	err := s.WriteServerConfig(serverConfig)
 	if err != nil {
 		return err
 	}
 
-	fname := fmt.Sprintf("client%v.json", configIndex)
+	fname := fmt.Sprintf("client-%v.json", clientConfigSuffix)
 	err = internal.WriteToFile(fname, clientConfig)
 	if err != nil {
 		return err
