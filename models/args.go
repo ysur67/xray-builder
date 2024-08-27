@@ -25,7 +25,7 @@ type UserRemoveArgs struct {
 }
 
 type SetupArgs struct {
-	Destination string `arg:"-d,--destination required" placeholder:"rkn.gov.ru/" help:"destination and serverName in xray server config"`
+	Destination string `arg:"-d,--destination,required" placeholder:"rkn.gov.ru/" help:"destination and serverName in xray server config"`
 	InstallXray string `arg:"-i,--install-xray" placeholder:"1.8.1" help:"Install xray-core by version"`
 }
 
