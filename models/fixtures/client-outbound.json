@@ -1,0 +1,32 @@
+{
+    "protocol": "vless",
+    "settings": {
+        "vnext": [
+            {
+                "address": "127.0.0.1",
+                "port": 443,
+                "users": [
+                    {
+                        "id": "4bdb184f-263d-47ce-8a68-c3267278a078",
+                        "flow": "xtls-rprx-vision",
+                        "encryption": "none",
+                        "comment": "hello"
+                    }
+                ]
+            }
+        ]
+    },
+    "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+            "show": false,
+            "fingerprint": "chrome",
+            "serverName": "www.gggg.com",
+            "publicKey": "some-publicKey",
+            "shortId": "some-shortId",
+            "spiderX": "/"
+        }
+    },
+    "tag": "proxy"
+}

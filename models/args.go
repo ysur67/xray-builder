@@ -11,17 +11,24 @@ type Args struct {
 }
 
 type UserArgs struct {
-	Add    *UserAddArgs    `arg:"subcommand:add" help:"add user to xray config"`
-	Remove *UserRemoveArgs `arg:"subcommand:remove"`
-	List   *struct{}       `arg:"subcommand:list"`
+	Add    *UserAddArgs            `arg:"subcommand:add" help:"add user to xray config"`
+	Remove *UserIdentificationArgs `arg:"subcommand:remove"`
+	Share  *ShareArgs              `arg:"subcommand:share"`
+	List   *struct{}               `arg:"subcommand:list"`
 }
 
 type UserAddArgs struct {
-	Comment string `arg:"positional,required" help:"Amount of users in generated config"`
+	Comment string `arg:"positional,required" help:"Comment of the new user."`
 }
 
-type UserRemoveArgs struct {
+type UserIdentificationArgs struct {
 	IdOrComment string `arg:"positional,required" help:"Id or comment of removed user."`
+}
+
+type ShareArgs struct {
+	UserIdentificationArgs
+
+	Format string `arg:"-f,--format,required" help:"qr | json | link"`
 }
 
 type SetupArgs struct {

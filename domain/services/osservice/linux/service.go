@@ -1,7 +1,6 @@
 package linux
 
 import (
-	"fmt"
 	"os/user"
 	commands "xraybuilder/domain/commands"
 	"xraybuilder/internal"
@@ -41,25 +40,6 @@ func (s *LinuxOsService) GenerateShortId() (*string, error) {
 
 func (s *LinuxOsService) WriteServerConfig(serverConfig *models.ServerConfig) error {
 	return internal.WriteToFile(s.XrayConfigPath, &serverConfig)
-}
-
-func (s *LinuxOsService) WriteConfigs(
-	serverConfig *models.ServerConfig,
-	clientConfig *models.ClientConfig,
-	clientConfigSuffix string,
-) error {
-	err := s.WriteServerConfig(serverConfig)
-	if err != nil {
-		return err
-	}
-
-	fname := fmt.Sprintf("client-%v.json", clientConfigSuffix)
-	err = internal.WriteToFile(fname, clientConfig)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *LinuxOsService) SaveKeyPair(pair *models.KeyPair) error {
