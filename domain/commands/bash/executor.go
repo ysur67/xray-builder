@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -59,8 +58,8 @@ func (b *BashCmdExecutor) GetServerAddr() (*string, error) {
 }
 
 func (b *BashCmdExecutor) RestartXray() error {
-	_, stderr, _ := b.Shell("systemctl restart xray")
-	return errors.New(stderr)
+	_, _, err := b.Shell("systemctl restart xray")
+	return err
 }
 
 func (b *BashCmdExecutor) Shell(command string) (string, string, error) {
