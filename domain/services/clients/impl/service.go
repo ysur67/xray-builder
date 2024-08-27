@@ -43,18 +43,6 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 	return &clientConfig, nil
 }
 
-func (b *ClientCfgServiceImpl) CreateMultipleConfigs(serverName string, clients *[]models.ClientDto, keyPair *models.KeyPair) (*[]models.ClientConfig, error) {
-	result := make([]models.ClientConfig, len(*clients))
-	for ind, elem := range *clients {
-		config, err := b.CreateClientConfig(serverName, &elem, keyPair)
-		if err != nil {
-			return nil, err
-		}
-		result[ind] = *config
-	}
-	return &result, nil
-}
-
 func New(svc osservice.OsService) *ClientCfgServiceImpl {
 	return &ClientCfgServiceImpl{svc}
 }
