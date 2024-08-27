@@ -14,8 +14,6 @@ import (
 	"github.com/alexflint/go-arg"
 )
 
-const InitialUserComment = "initial-user"
-
 func sudoMaybeRequired() {
 	log.Println("Probably you need to run this command with sudo.")
 }
@@ -76,7 +74,6 @@ func main() {
 }
 
 func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
-	clientService := clientservice.New(osService)
 	serverService := serverservice.New()
 
 	if args.InstallXray != "" {
@@ -101,18 +98,8 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 		panic(err)
 	}
 
-	client, err := clientService.CreateClient(InitialUserComment)
-	if err != nil {
-		panic(err)
-	}
-
 	serverService.SetupServer(cfg, keyPair, args.Destination)
-	serverService.AppendClient(cfg, client)
-	clientConfig, err := clientService.CreateClientConfig(cfg.ServerName(), client, keyPair)
-	if err != nil {
-		panic(err)
-	}
-	osService.WriteConfigs(cfg, clientConfig, 0)
+	osService.WriteServerConfig(cfg)
 	if err = osService.RestartXray(); err != nil {
 		panic(err)
 	}
@@ -158,11 +145,7 @@ func ListClients(osService *linuxService.LinuxOsService) {
 	}
 
 	users := serverService.GetUsers(cfg)
-	result, err := json.MarshalIndent(users, "", "    ")
-	if err != nil {
-		panic(err)
-	}
-
+	result, _ := json.MarshalIndent(users, "", "    ")
 	fmt.Println(string(result))
 }
 
