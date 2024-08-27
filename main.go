@@ -107,6 +107,7 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	}
 
 	serverService.SetupServer(cfg, keyPair, args.Destination)
+	serverService.AppendClient(cfg, client)
 	clientConfig, err := clientService.CreateClientConfig(cfg.ServerName(), client, keyPair)
 	if err != nil {
 		panic(err)
