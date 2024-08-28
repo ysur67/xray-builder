@@ -73,10 +73,18 @@ type Outbound struct {
 }
 
 type PolicyObject struct {
+	System struct {
+		StatsInboundUplink    bool `json:"statsInboundUplink,omitempty"`
+		StatsInboundDownlink  bool `json:"statsInboundDownlink,omitempty"`
+		StatsOutboundUplink   bool `json:"statsOutboundUplink,omitempty"`
+		StatsOutboundDownlink bool `json:"statsOutboundDownlink,omitempty"`
+	} `json:"system,omitempty"`
 	Levels struct {
 		Num0 struct {
-			Handshake int `json:"handshake"`
-			ConnIdle  int `json:"connIdle"`
+			StatsUserUplink   bool `json:"statsUserUplink,omitempty"`
+			StatsUserDownlink bool `json:"statsUserDownlink,omitempty"`
+			Handshake         int  `json:"handshake"`
+			ConnIdle          int  `json:"connIdle"`
 		} `json:"0"`
 	} `json:"levels"`
 }
@@ -87,6 +95,14 @@ type ServerConfig struct {
 	Outbounds []Outbound    `json:"outbounds"`
 	Policy    PolicyObject  `json:"policy"`
 	Inbounds  []Inbound     `json:"inbounds"`
+	Stats     struct{}      `json:"stats"`
+	Api       ApiConfig     `json:"api,omitempty"`
+}
+
+type ApiConfig struct {
+	Tag      string   `json:"tag,omitempty"`
+	Listen   string   `json:"listen,omitempty"`
+	Services []string `json:"services,omitempty"`
 }
 
 func (s *ServerConfig) FirstInbound() *Inbound {
