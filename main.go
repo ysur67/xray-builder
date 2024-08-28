@@ -154,6 +154,10 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs)
 	if err != nil {
 		panic(err)
 	}
+
+	if err = osService.RestartXray(); err != nil {
+		panic(err)
+	}
 }
 
 func ListClients(osService *linuxService.LinuxOsService) {
@@ -188,4 +192,9 @@ func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserIdent
 
 	userJson, _ := json.MarshalIndent(user, "", "    ")
 	fmt.Println(string(userJson))
+
+	err = osService.RestartXray()
+	if err != nil {
+		panic(err)
+	}
 }
