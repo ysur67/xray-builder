@@ -1,5 +1,6 @@
 #!/bin/env bash
 
+echo -e "\033[1;33mSince: $(systemctl show -p ActiveEnterTimestamp xray | cut -d'=' -f2)\033[0m"
 echo -e "           \033[1;34m↓ down (mb) \033[1;32m↑ up (mb)\033[0m"
 xray api statsquery | jq -r '
   def pad_left($str; $len): ($str | length) as $l | if $l < $len then (" " * ($len - $l)) + $str else $str end;
