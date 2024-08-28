@@ -1,6 +1,9 @@
 #!/bin/env bash
 
+echo -e "           \033[1;34m↓ down (mb) \033[1;32m↑ up (mb)\033[0m"
 xray api statsquery | jq -r '
+  def pad_left($str; $len): ($str | length) as $l | if $l < $len then (" " * ($len - $l)) + $str else $str end;
+
   reduce .stat[] as $item ({};
     if $item.name | startswith("user>>>") then
       ($item.name | split(">>>")) as $keys |
@@ -8,6 +11,6 @@ xray api statsquery | jq -r '
     else
       .
     end
-  ) | to_entries[] |
-  "\(.key) \u001b[31m↓\(.value.downlink // 0)mb\u001b[0m \u001b[32m↑\(.value.uplink // 0)mb\u001b[0m"
+  ) | to_entries | sort_by(-.value.downlink // 0)[] |
+  "\(pad_left(.key; 10)) \u001b[34m\(pad_left((.value.downlink // 0 | tostring); 10))\u001b[0m \u001b[32m\(pad_left((.value.uplink // 0 | tostring); 10))\u001b[0m"
 '
