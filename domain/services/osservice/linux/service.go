@@ -17,17 +17,9 @@ func (s *LinuxOsService) GenerateKeyPair() (*models.KeyPair, error) {
 	return s.executor.GenerateKeyPair()
 }
 
-func derefString(s *string) string {
-	if s != nil {
-		return *s
-	}
-
-	return ""
-}
-
 func (s *LinuxOsService) GetServerAddr() (string, error) {
 	addr, err := s.executor.GetServerAddr()
-	return derefString(addr), err
+	return internal.DerefString(addr), err
 }
 
 func (s *LinuxOsService) GenerateShortId() (*string, error) {
