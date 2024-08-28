@@ -1,0 +1,13 @@
+#!/bin/env bash
+
+xray api statsquery | jq -r '
+  reduce .stat[] as $item ({};
+    if $item.name | startswith("user>>>") then
+      ($item.name | split(">>>")) as $keys |
+      .[$keys[1]] += { ($keys[3]): ($item.value | tonumber / 1024 / 1024) | round }
+    else
+      .
+    end
+  ) | to_entries[] |
+  "\(.key) \u001b[31m↓\(.value.downlink // 0)mb\u001b[0m \u001b[32m↑\(.value.uplink // 0)mb\u001b[0m"
+'
