@@ -24,13 +24,6 @@ func main() {
 	argParser := arg.MustParse(&args)
 
 	cmdExecutor := bashexecutor.New(args.Verbose)
-
-	if args.InstallMisc != nil {
-		cmdExecutor.Shell("chmod +x shell/iptables.sh; shell/iptables.sh")
-		cmdExecutor.Shell("chmod +x shell/enable-tcp-bbr.sh; shell/enable-tcp-bbr.sh")
-		return
-	}
-
 	osService := linuxService.New(args.XrayConfigPath, args.XrayKeypairPath, cmdExecutor)
 	isSuperUser, err := osService.IsSuperUser()
 	if err != nil {

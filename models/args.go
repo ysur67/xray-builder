@@ -3,11 +3,10 @@ package models
 type Args struct {
 	XrayConfigPath  string `arg:"-c,--config" default:"/usr/local/etc/xray/config.json"`
 	XrayKeypairPath string `arg:"-k,--keypair" default:"/usr/local/etc/xray/keypair.json"`
+	Verbose         bool   `arg:"-v,--verbose"`
 
-	Verbose     bool       `arg:"-v,--verbose"`
-	User        *UserArgs  `arg:"subcommand:user" help:"user management"`
-	Setup       *SetupArgs `arg:"subcommand:setup" help:"install xray and generate configs"`
-	InstallMisc *struct{}  `arg:"subcommand:install-misc" help:"Install additional iptables and TCP BBR configuration"`
+	User  *UserArgs  `arg:"subcommand:user" help:"user management"`
+	Setup *SetupArgs `arg:"subcommand:setup" help:"install xray and generate configs"`
 }
 
 type UserArgs struct {
