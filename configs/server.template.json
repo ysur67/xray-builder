@@ -64,12 +64,30 @@
             "tag": "block"
         }
     ],
+    "api": {
+        "tag": "api",
+        "listen": "127.0.0.1:8080",
+        "services": [
+            "HandlerService",
+            "LoggerService",
+            "StatsService"
+        ]
+    },
+    "stats": {},
     "policy": {
         "levels": {
             "0": {
+                "statsUserUplink": true,
+                "statsUserDownlink": true,
                 "handshake": 3,
                 "connIdle": 180
             }
+        },
+        "system": {
+            "statsInboundUplink": true,
+            "statsInboundDownlink": true,
+            "statsOutboundUplink": true,
+            "statsOutboundDownlink": true
         }
     }
 }
