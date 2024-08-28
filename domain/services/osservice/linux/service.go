@@ -17,10 +17,6 @@ func (s *LinuxOsService) GenerateKeyPair() (*models.KeyPair, error) {
 	return s.executor.GenerateKeyPair()
 }
 
-func (s *LinuxOsService) DownloadAndInstallXray(version string) error {
-	return s.executor.DownloadAndInstallXray(version)
-}
-
 func derefString(s *string) string {
 	if s != nil {
 		return *s

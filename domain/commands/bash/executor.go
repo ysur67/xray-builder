@@ -26,19 +26,6 @@ func (b *BashCmdExecutor) GenerateKeyPair() (*models.KeyPair, error) {
 	return keyPair, nil
 }
 
-func (b *BashCmdExecutor) DownloadAndInstallXray(version string) error {
-	cmd := fmt.Sprintf(
-		`bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u root --version %s`,
-		version,
-	)
-	out, _, err := b.Shell(cmd)
-	if err != nil {
-		return err
-	}
-	fmt.Println(out)
-	return nil
-}
-
 func (b *BashCmdExecutor) GenerateShortId() (*string, error) {
 	out, _, err := b.Shell("openssl rand -hex 8")
 	if err != nil {

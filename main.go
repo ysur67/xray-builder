@@ -122,13 +122,6 @@ func Share(osService *linuxService.LinuxOsService, args *models.ShareArgs) {
 func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	serverService := serverservice.New()
 
-	if args.InstallXray != "" {
-		err := osService.DownloadAndInstallXray(args.InstallXray)
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	cfg, err := serverService.ReadConfig("")
 	if err != nil {
 		panic(err)

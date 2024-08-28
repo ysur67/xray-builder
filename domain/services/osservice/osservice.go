@@ -6,7 +6,6 @@ import (
 
 type OsService interface {
 	GenerateKeyPair() (*models.KeyPair, error)
-	DownloadAndInstallXray(version string) error
 	GetServerAddr() (string, error)
 	GenerateShortId() (*string, error)
 	WriteServerConfig(serverConfig *models.ServerConfig) error
