@@ -8,7 +8,7 @@ xray api statsquery | jq -r '
   reduce .stat[] as $item ({};
     if $item.name | startswith("user>>>") then
       ($item.name | split(">>>")) as $keys |
-      .[$keys[1]] += { ($keys[3]): ($item.value | tonumber / 1024 / 1024) | round }
+      .[$keys[1]] += { ($keys[3]): ($item.value // 0 | tonumber / 1024 / 1024) | round }
     else
       .
     end
