@@ -133,7 +133,7 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	serverService.SetupServer(cfg, keyPair, args.Destination)
 	osService.WriteServerConfig(cfg)
 	if err = osService.RestartXray(); err != nil {
-		panic(err)
+		log.Fatalln("Xray restart failed. Please restart it manually.")
 	}
 }
 
@@ -156,7 +156,7 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs)
 	}
 
 	if err = osService.RestartXray(); err != nil {
-		panic(err)
+		log.Fatalln("Xray restart failed. Please restart it manually.")
 	}
 }
 
@@ -195,6 +195,6 @@ func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserIdent
 
 	err = osService.RestartXray()
 	if err != nil {
-		panic(err)
+		log.Fatalln("Xray restart failed. Please restart it manually.")
 	}
 }
