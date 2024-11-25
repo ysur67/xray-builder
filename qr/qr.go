@@ -8,7 +8,7 @@ import (
 )
 
 func RenderString(s string, inverseColor bool) {
-	q, err := qrcode.New(s, qrcode.Low)
+	q, err := qrcode.New(s, qrcode.Medium)
 	if err != nil {
 		log.Fatal(err)
 	}
