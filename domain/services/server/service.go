@@ -5,11 +5,13 @@ import (
 	"xraybuilder/models"
 )
 
-type ServerService struct{}
+type ServerService struct {
+	configsDirectory string
+}
 
 func (s *ServerService) ReadConfig(path string) (*models.ServerConfig, error) {
 	if path == "" {
-		path = "configs/server.template.json"
+		path = s.configsDirectory + "/server.template.json"
 	}
 	config := models.ServerConfig{}
 	err := internal.ReadJson(path, &config)
@@ -92,5 +94,7 @@ func (s *ServerService) ReadKeyPair(path string) (*models.KeyPair, error) {
 }
 
 func New() *ServerService {
-	return &ServerService{}
+	return &ServerService{
+		configsDirectory: internal.ResolveConfigPath(),
+	}
 }

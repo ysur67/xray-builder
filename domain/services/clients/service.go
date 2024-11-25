@@ -7,7 +7,8 @@ import (
 )
 
 type ClientCfgServiceImpl struct {
-	svc osservice.OsService
+	configsDirectory string
+	svc              osservice.OsService
 }
 
 func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.Client, error) {
@@ -20,7 +21,7 @@ func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.Client, err
 
 func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.Client, keyPair *models.KeyPair) (*models.ClientConfig, error) {
 	clientConfig := models.ClientConfig{}
-	internal.ReadJson("configs/client.template.json", &clientConfig)
+	internal.ReadJson(b.configsDirectory+"/client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
 	first := clientConfig.FirstOutbound()
 	vnext := make([]models.ClientVnext, 1)
@@ -44,5 +45,8 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 }
 
 func New(svc osservice.OsService) *ClientCfgServiceImpl {
-	return &ClientCfgServiceImpl{svc}
+	return &ClientCfgServiceImpl{
+		svc:              svc,
+		configsDirectory: internal.ResolveConfigPath(),
+	}
 }
