@@ -2,9 +2,9 @@ package linux
 
 import (
 	"os/user"
-	commands "xraybuilder/domain/commands"
-	"xraybuilder/internal"
-	"xraybuilder/models"
+	commands "xray-builder/domain/commands"
+	"xray-builder/internal"
+	"xray-builder/models"
 )
 
 type LinuxOsService struct {

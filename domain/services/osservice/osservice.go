@@ -1,7 +1,7 @@
 package osservice
 
 import (
-	"xraybuilder/models"
+	"xray-builder/models"
 )
 
 type OsService interface {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
-	"xraybuilder/models"
+	"xray-builder/models"
 )
 
 const ShellPath = "/usr/bin/sh"

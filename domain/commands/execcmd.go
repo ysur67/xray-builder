@@ -1,6 +1,6 @@
 package commands
 
-import "xraybuilder/models"
+import "xray-builder/models"
 
 type CmdExecutor interface {
 	GenerateKeyPair() (*models.KeyPair, error)

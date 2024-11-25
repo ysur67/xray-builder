@@ -2,8 +2,8 @@ package impl
 
 import (
 	"testing"
-	"xraybuilder/internal"
-	"xraybuilder/models"
+	"xray-builder/internal"
+	"xray-builder/models"
 )
 
 func config() *models.ServerConfig {

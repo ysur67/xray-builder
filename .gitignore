@@ -24,7 +24,7 @@ go.work
 .idea
 
 # artifacts
-xraybuilder
+xray-builder
 /server.template.json
 /client.template.json
 /client*.json

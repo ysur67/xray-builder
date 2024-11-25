@@ -1,4 +1,4 @@
-module xraybuilder
+module xray-builder
 
 go 1.20
 

@@ -2,8 +2,8 @@ package commands
 
 import (
 	"strings"
-	"xraybuilder/domain/services/osservice"
-	"xraybuilder/models"
+	"xray-builder/domain/services/osservice"
+	"xray-builder/models"
 )
 
 func fromStdOut(value string) (*models.KeyPair, error) {

@@ -1,9 +1,9 @@
 package impl
 
 import (
-	"xraybuilder/domain/services/osservice"
-	"xraybuilder/internal"
-	"xraybuilder/models"
+	"xray-builder/domain/services/osservice"
+	"xray-builder/internal"
+	"xray-builder/models"
 )
 
 type ClientCfgServiceImpl struct {

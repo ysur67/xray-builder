@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"xraybuilder/internal"
-	"xraybuilder/models"
+	"xray-builder/internal"
+	"xray-builder/models"
 )
 
 type ServerService struct {

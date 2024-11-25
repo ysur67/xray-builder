@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"xraybuilder/models"
-	"xraybuilder/qr"
+	"xray-builder/models"
+	"xray-builder/qr"
 
-	bashexecutor "xraybuilder/domain/commands/bash"
-	clientservice "xraybuilder/domain/services/clients"
-	linuxService "xraybuilder/domain/services/osservice/linux"
-	serverservice "xraybuilder/domain/services/server"
+	bashexecutor "xray-builder/domain/commands/bash"
+	clientservice "xray-builder/domain/services/clients"
+	linuxService "xray-builder/domain/services/osservice/linux"
+	serverservice "xray-builder/domain/services/server"
 
 	"github.com/alexflint/go-arg"
 )
