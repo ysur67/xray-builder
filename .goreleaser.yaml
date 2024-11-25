@@ -1,10 +1,12 @@
+version: 2
+
 builds:
   - id: "linux-build"
     goos:
       - linux
     goarch:
       - amd64
-    binary: xraybuilder
+    binary: xray-builder
 
 archives:
   -
