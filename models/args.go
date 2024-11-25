@@ -27,7 +27,7 @@ type UserIdentificationArgs struct {
 type ShareArgs struct {
 	UserIdentificationArgs
 
-	Format string `arg:"-f,--format,required" help:"qr | json | link"`
+	Format string `arg:"-f,--format" default:"qr" help:"qr | json | link"`
 }
 
 type SetupArgs struct {
