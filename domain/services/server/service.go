@@ -85,6 +85,26 @@ func (s *ServerService) RemoveUser(cfg *models.ServerConfig, userIdOrComment str
 	return nil
 }
 
+func (s *ServerService) ToggleUserEnabled(cfg *models.ServerConfig, userIdOrComment string, isEnabled bool) *models.Client {
+	inbound := cfg.FirstInbound()
+
+	user := s.GetUser(cfg, userIdOrComment)
+
+	if isEnabled {
+		inbound.StreamSettings.RealitySettings.ShortIds = append(
+			inbound.StreamSettings.RealitySettings.ShortIds,
+			user.ShortId,
+		)
+	} else {
+		inbound.StreamSettings.RealitySettings.ShortIds = internal.Remove(
+			inbound.StreamSettings.RealitySettings.ShortIds,
+			user.ShortId,
+		)
+	}
+
+	return user
+}
+
 func (s *ServerService) ReadKeyPair(path string) (*models.KeyPair, error) {
 	var result models.KeyPair
 	if err := internal.ReadJson(path, &result); err != nil {

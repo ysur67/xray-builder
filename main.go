@@ -16,7 +16,7 @@ import (
 )
 
 func sudoMaybeRequired() {
-	log.Println("Probably you need to run this command with sudo.")
+	log.Println("You may need to run this command with sudo.")
 }
 
 func main() {
@@ -56,6 +56,22 @@ func main() {
 
 			RemoveClient(osService, args.User.Remove)
 			return
+		}
+
+		if args.User.Disable != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			ToggleClientEnabled(osService, args.User.Disable, false)
+		}
+
+		if args.User.Enable != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			ToggleClientEnabled(osService, args.User.Enable, true)
 		}
 
 		if args.User.List != nil {
@@ -172,6 +188,30 @@ func ListClients(osService *linuxService.LinuxOsService) {
 	fmt.Println(string(result))
 }
 
+func ToggleClientEnabled(osService *linuxService.LinuxOsService, args *models.UserIdentificationArgs, isEnabled bool) {
+	serverService := serverservice.New()
+	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
+	if err != nil {
+		panic(err)
+	}
+
+	user := serverService.ToggleUserEnabled(cfg, args.IdOrComment, isEnabled)
+	if user == nil {
+		fmt.Println("user not found")
+		return
+	}
+
+	err = osService.WriteServerConfig(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	err = osService.RestartXray()
+	if err != nil {
+		log.Fatalln("Xray restart failed. Please restart it manually.")
+	}
+}
+
 func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserIdentificationArgs) {
 	serverService := serverservice.New()
 	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
@@ -181,7 +221,7 @@ func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserIdent
 
 	user := serverService.RemoveUser(cfg, args.IdOrComment)
 	if user == nil {
-		log.Fatalln("user not found")
+		fmt.Println("user not found")
 		return
 	}
 

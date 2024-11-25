@@ -10,10 +10,12 @@ type Args struct {
 }
 
 type UserArgs struct {
-	Add    *UserAddArgs            `arg:"subcommand:add" help:"add user to xray config"`
-	Remove *UserIdentificationArgs `arg:"subcommand:remove"`
-	Share  *ShareArgs              `arg:"subcommand:share"`
-	List   *struct{}               `arg:"subcommand:list"`
+	Add     *UserAddArgs            `arg:"subcommand:add" help:"add user to xray config"`
+	Remove  *UserIdentificationArgs `arg:"subcommand:remove"`
+	Enable  *UserIdentificationArgs `arg:"subcommand:enable"`
+	Disable *UserIdentificationArgs `arg:"subcommand:disable"`
+	Share   *ShareArgs              `arg:"subcommand:share"`
+	List    *struct{}               `arg:"subcommand:list"`
 }
 
 type UserAddArgs struct {
