@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"xray-builder/models"
 	"xray-builder/qr"
 
@@ -13,10 +14,11 @@ import (
 	serverservice "xray-builder/domain/services/server"
 
 	"github.com/alexflint/go-arg"
+	"github.com/samber/lo"
 )
 
 func sudoMaybeRequired() {
-	log.Println("You may need to run this command with sudo.")
+	fmt.Println("You may need to run this command with sudo.")
 }
 
 func main() {
@@ -39,48 +41,50 @@ func main() {
 		return
 	}
 
-	if args.User != nil {
-		if args.User.Add != nil {
+	if args.UserList != nil {
+		ListClients(osService)
+		return
+	}
+
+	if lo.IsNotEmpty(args.User) {
+		if args.Add != nil {
 			if !isSuperUser {
 				sudoMaybeRequired()
 			}
 
-			AddClient(osService, args.User.Add)
+			AddClient(osService, args.User)
 			return
 		}
 
-		if args.User.Remove != nil {
+		if args.Remove != nil {
 			if !isSuperUser {
 				sudoMaybeRequired()
 			}
 
-			RemoveClient(osService, args.User.Remove)
+			RemoveClient(osService, args.User)
 			return
 		}
 
-		if args.User.Disable != nil {
+		if args.Disable != nil {
 			if !isSuperUser {
 				sudoMaybeRequired()
 			}
 
-			ToggleClientEnabled(osService, args.User.Disable, false)
-		}
-
-		if args.User.Enable != nil {
-			if !isSuperUser {
-				sudoMaybeRequired()
-			}
-
-			ToggleClientEnabled(osService, args.User.Enable, true)
-		}
-
-		if args.User.List != nil {
-			ListClients(osService)
+			ToggleClientEnabled(osService, args.User, false)
 			return
 		}
 
-		if args.User.Share != nil {
-			Share(osService, args.User.Share)
+		if args.Enable != nil {
+			if !isSuperUser {
+				sudoMaybeRequired()
+			}
+
+			ToggleClientEnabled(osService, args.User, true)
+			return
+		}
+
+		if args.Share != nil {
+			Share(osService, args.User, args.Share)
 			return
 		}
 	}
@@ -88,7 +92,7 @@ func main() {
 	argParser.WriteHelp(log.Writer())
 }
 
-func Share(osService *linuxService.LinuxOsService, args *models.ShareArgs) {
+func Share(osService *linuxService.LinuxOsService, comment string, args *models.ShareArgs) {
 	serverService := serverservice.New()
 	serverConfig, err := serverService.ReadConfig(osService.XrayConfigPath)
 
@@ -96,7 +100,7 @@ func Share(osService *linuxService.LinuxOsService, args *models.ShareArgs) {
 		panic(err)
 	}
 
-	client := serverService.GetUser(serverConfig, args.IdOrComment)
+	client := serverService.GetUser(serverConfig, comment)
 	if client == nil {
 		log.Fatalln("user not found")
 		return
@@ -113,16 +117,16 @@ func Share(osService *linuxService.LinuxOsService, args *models.ShareArgs) {
 		panic(err)
 	}
 
-	switch {
-	case args.Format == "link":
+	switch args.Format {
+	case "link":
 		link := clientConfig.FirstOutbound().ShareLink(client.ShortId)
 		fmt.Println(link.String())
 
-	case args.Format == "qr":
+	case "qr":
 		link := clientConfig.FirstOutbound().ShareLink(client.ShortId)
 		qr.RenderString(link.String(), false)
 
-	case args.Format == "json":
+	case "json":
 		result, _ := json.MarshalIndent(clientConfig, "", "    ")
 		fmt.Println(string(result))
 	}
@@ -153,14 +157,19 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 	}
 }
 
-func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs) {
+func AddClient(osService *linuxService.LinuxOsService, comment string) {
 	clientService := clientservice.New(osService)
 	serverService := serverservice.New()
 	serverConfig, err := serverService.ReadConfig(osService.XrayConfigPath)
 	if err != nil {
 		panic(err)
 	}
-	client, err := clientService.CreateClient(args.Comment)
+
+	if serverService.GetUser(serverConfig, comment) != nil {
+		log.Fatalln("user already exists")
+	}
+
+	client, err := clientService.CreateClient(comment)
 	if err != nil {
 		panic(err)
 	}
@@ -168,34 +177,40 @@ func AddClient(osService *linuxService.LinuxOsService, args *models.UserAddArgs)
 
 	err = osService.WriteServerConfig(serverConfig)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	if err = osService.RestartXray(); err != nil {
 		log.Fatalln("Xray restart failed. Please restart it manually.")
 	}
+
+	fmt.Println("xray restarted")
 }
 
 func ListClients(osService *linuxService.LinuxOsService) {
 	serverService := serverservice.New()
 	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 
 	users := serverService.GetUsers(cfg)
-	result, _ := json.MarshalIndent(users, "", "    ")
-	fmt.Println(string(result))
+
+	comments := lo.Map(*users, func(u models.Client, _ int) string {
+		return u.Comment
+	})
+
+	fmt.Println(strings.Join(comments, "\n"))
 }
 
-func ToggleClientEnabled(osService *linuxService.LinuxOsService, args *models.UserIdentificationArgs, isEnabled bool) {
+func ToggleClientEnabled(osService *linuxService.LinuxOsService, comment string, isEnabled bool) {
 	serverService := serverservice.New()
 	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
 	if err != nil {
 		panic(err)
 	}
 
-	user := serverService.ToggleUserEnabled(cfg, args.IdOrComment, isEnabled)
+	user := serverService.ToggleUserEnabled(cfg, comment, isEnabled)
 	if user == nil {
 		fmt.Println("user not found")
 		return
@@ -212,14 +227,14 @@ func ToggleClientEnabled(osService *linuxService.LinuxOsService, args *models.Us
 	}
 }
 
-func RemoveClient(osService *linuxService.LinuxOsService, args *models.UserIdentificationArgs) {
+func RemoveClient(osService *linuxService.LinuxOsService, comment string) {
 	serverService := serverservice.New()
 	cfg, err := serverService.ReadConfig(osService.XrayConfigPath)
 	if err != nil {
 		panic(err)
 	}
 
-	user := serverService.RemoveUser(cfg, args.IdOrComment)
+	user := serverService.RemoveUser(cfg, comment)
 	if user == nil {
 		fmt.Println("user not found")
 		return

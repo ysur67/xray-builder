@@ -5,7 +5,7 @@ function _xray-builder {
     '-c[Specify xray config path]:config file:_files' \
     '-k[Specify xray keypair path]:keypair file:_files' \
     '-v[Enable verbose mode]' \
-    '1:subcommand:(user setup install-misc)' \
+    '1:subcommand:(user setup)' \
     '*::arg:->args'
 
   case $state in
@@ -17,10 +17,6 @@ function _xray-builder {
           ;;
         setup)
           _xray-builder_setup
-          return 0
-          ;;
-        install-misc)
-          _nothing
           return 0
           ;;
       esac

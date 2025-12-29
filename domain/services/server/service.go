@@ -3,6 +3,8 @@ package impl
 import (
 	"xray-builder/internal"
 	"xray-builder/models"
+
+	"github.com/samber/lo"
 )
 
 type ServerService struct {
@@ -58,48 +60,50 @@ func (s *ServerService) GetUsers(cfg *models.ServerConfig) *[]models.Client {
 
 func (s *ServerService) GetUser(cfg *models.ServerConfig, userIdOrComment string) *models.Client {
 	inbound := cfg.FirstInbound()
-	for _, user := range inbound.Settings.Clients {
-		if user.Comment == userIdOrComment || user.Id == userIdOrComment {
-			return &user
-		}
+
+	client, isFound := lo.Find(inbound.Settings.Clients, func(user models.Client) bool {
+		return user.Comment == userIdOrComment || user.Id == userIdOrComment
+	})
+
+	if !isFound {
+		return nil
 	}
 
-	return nil
+	return &client
 }
 
-func (s *ServerService) RemoveUser(cfg *models.ServerConfig, userIdOrComment string) *models.Client {
+func (s *ServerService) RemoveUser(cfg *models.ServerConfig, userComment string) *models.Client {
 	inbound := cfg.FirstInbound()
-	for i, user := range inbound.Settings.Clients {
-		if user.Comment == userIdOrComment || user.Id == userIdOrComment {
-			inbound.Settings.Clients = internal.RemoveByIndex(inbound.Settings.Clients, i)
-
-			inbound.StreamSettings.RealitySettings.ShortIds = internal.Remove(
-				inbound.StreamSettings.RealitySettings.ShortIds,
-				user.ShortId,
-			)
-
-			return &user
-		}
+	user := s.GetUser(cfg, userComment)
+	if user == nil {
+		return nil
 	}
 
-	return nil
+	s.ToggleUserEnabled(cfg, userComment, false)
+	inbound.Settings.Clients = lo.Filter(inbound.Settings.Clients, func(c models.Client, _ int) bool {
+		return c.Comment != userComment
+	})
+
+	return user
 }
 
-func (s *ServerService) ToggleUserEnabled(cfg *models.ServerConfig, userIdOrComment string, isEnabled bool) *models.Client {
+func (s *ServerService) ToggleUserEnabled(cfg *models.ServerConfig, userComment string, isEnabled bool) *models.Client {
 	inbound := cfg.FirstInbound()
 
-	user := s.GetUser(cfg, userIdOrComment)
+	shortIds := inbound.StreamSettings.RealitySettings.ShortIds
+	user := s.GetUser(cfg, userComment)
+	if user == nil {
+		return nil
+	}
 
 	if isEnabled {
-		inbound.StreamSettings.RealitySettings.ShortIds = append(
-			inbound.StreamSettings.RealitySettings.ShortIds,
-			user.ShortId,
-		)
+		if lo.Contains(shortIds, user.ShortId) {
+			return user
+		}
+
+		inbound.StreamSettings.RealitySettings.ShortIds = append(shortIds, user.ShortId)
 	} else {
-		inbound.StreamSettings.RealitySettings.ShortIds = internal.Remove(
-			inbound.StreamSettings.RealitySettings.ShortIds,
-			user.ShortId,
-		)
+		inbound.StreamSettings.RealitySettings.ShortIds = internal.Remove(shortIds, user.ShortId)
 	}
 
 	return user
