@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -15,9 +16,9 @@ type BashCmdExecutor struct {
 }
 
 func (b *BashCmdExecutor) GenerateKeyPair() (*models.KeyPair, error) {
-	out, _, err := b.Shell("xray x25519")
+	out, stderr, err := b.Shell("xray x25519")
 	if err != nil {
-		return nil, err
+		return nil, errors.New(stderr)
 	}
 	keyPair, err := fromStdOut(out)
 	if err != nil {
