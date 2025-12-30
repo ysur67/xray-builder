@@ -3,14 +3,14 @@ package commands
 import "testing"
 
 func TestValidFromStdOut(t *testing.T) {
-	result, err := fromStdOut("Private key: uHMCmvXiUFxdniESp-k_lZHwnpkxNxeqjPAdPgKhNWo\nPublic key: 2M_r3tjVelo8SGo2zaWOjGeMkHkDFO9TxtDeMIoa2ns")
+	result, err := fromStdOut("PrivateKey: uHMCmvXiUFxdniESpk_lZHwnpkxNxeqjPAdPgKhNWo\nPassword: 2M_r3tjVelo8SGo2zaWOjGeMkHkDFO9TxtDeMIoa2ns\nHash32: 7s8O-YBq1hon4rKk-8zbsEo2EBsQjMCjzfGAfGUItvo")
 	if err != nil {
 		t.Error("Invalid response, expected no errors")
 	}
 	if result.Pub != "2M_r3tjVelo8SGo2zaWOjGeMkHkDFO9TxtDeMIoa2ns" {
 		t.Error("Unexpected public key")
 	}
-	if result.Private != "uHMCmvXiUFxdniESp-k_lZHwnpkxNxeqjPAdPgKhNWo" {
+	if result.Private != "uHMCmvXiUFxdniESpk_lZHwnpkxNxeqjPAdPgKhNWo" {
 		t.Error("Unexpected private key")
 	}
 }

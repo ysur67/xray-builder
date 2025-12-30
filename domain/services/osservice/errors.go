@@ -7,8 +7,7 @@ import (
 type KeyPairServiceErrorType int
 
 const (
-	EmptyResponse KeyPairServiceErrorType = iota
-	InvalidResponse
+	InvalidResponse KeyPairServiceErrorType = iota
 )
 
 type KeyPairServiceError struct {

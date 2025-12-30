@@ -8,7 +8,7 @@ import (
 
 func fromStdOut(value string) (*models.KeyPair, error) {
 	values := strings.Split(strings.TrimSuffix(value, "\n"), "\n")
-	if len(values) != 2 {
+	if len(values) < 2 {
 		return nil, &osservice.KeyPairServiceError{Type: osservice.InvalidResponse}
 	}
 	private, public := values[0], values[1]
