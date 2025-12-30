@@ -142,12 +142,12 @@ func Setup(osService *linuxService.LinuxOsService, args *models.SetupArgs) {
 
 	keyPair, err := osService.GenerateKeyPair()
 	if err != nil {
-		panic(err)
+		log.Fatalln("GenerateKeyPair", err)
 	}
 
 	err = osService.SaveKeyPair(keyPair)
 	if err != nil {
-		panic(err)
+		log.Fatalln("SaveKeyPair", err)
 	}
 
 	serverService.SetupServer(cfg, keyPair, args.Destination)
