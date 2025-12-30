@@ -15,12 +15,14 @@ func fromStdOut(value string) (*models.KeyPair, error) {
 	if private == "" || public == "" {
 		return nil, &osservice.KeyPairServiceError{Type: osservice.InvalidResponse}
 	}
-	private = removePrefix(private, "Private key:")
-	public = removePrefix(public, "Public key:")
+	private = removePrefix(private)
+	public = removePrefix(public)
 	return models.NewKeyPair(public, private), nil
 }
 
-func removePrefix(target string, prefix string) string {
-	result := strings.TrimPrefix(target, prefix)
-	return strings.TrimSpace(result)
+func removePrefix(target string) string {
+	// PrivateKey: abcd
+	parts := strings.Split(target, ":")
+
+	return strings.TrimSpace(parts[1])
 }
