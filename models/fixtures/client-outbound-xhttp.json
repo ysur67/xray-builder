@@ -1,0 +1,35 @@
+{
+    "protocol": "vless",
+    "settings": {
+        "vnext": [
+            {
+                "address": "127.0.0.1",
+                "port": 443,
+                "users": [
+                    {
+                        "id": "4bdb184f-263d-47ce-8a68-c3267278a078",
+                        "flow": "",
+                        "encryption": "none",
+                        "comment": "hello"
+                    }
+                ]
+            }
+        ]
+    },
+    "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": {
+            "show": false,
+            "fingerprint": "chrome",
+            "serverName": "www.microsoft.com",
+            "publicKey": "some-publicKey",
+            "shortId": "some-shortId",
+            "spiderX": ""
+        },
+        "xhttpSettings": {
+            "path": "/xh"
+        }
+    },
+    "tag": "proxy"
+}
