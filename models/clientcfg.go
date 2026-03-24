@@ -55,9 +55,7 @@ type ClientOutbound struct {
 			ShortID     string `json:"shortId"`
 			SpiderX     string `json:"spiderX"`
 		} `json:"realitySettings"`
-		XhttpSettings *struct {
-			Path string `json:"path"`
-		} `json:"xhttpSettings,omitempty"`
+		XhttpSettings *XhttpSettingsObject `json:"xhttpSettings,omitempty"`
 	} `json:"streamSettings,omitempty"`
 	Tag string `json:"tag"`
 }

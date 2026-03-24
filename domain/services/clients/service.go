@@ -50,9 +50,9 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 	first.StreamSettings.RealitySettings.PublicKey = keyPair.Pub
 
 	if serverStreamSettings.XhttpSettings != nil {
-		first.StreamSettings.XhttpSettings = &struct {
-			Path string `json:"path"`
-		}{Path: serverStreamSettings.XhttpSettings.Path}
+		first.StreamSettings.XhttpSettings = &models.XhttpSettingsObject{
+			Path: serverStreamSettings.XhttpSettings.Path,
+		}
 	}
 
 	return &clientConfig, nil
