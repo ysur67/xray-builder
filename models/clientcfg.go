@@ -55,6 +55,7 @@ type ClientOutbound struct {
 			ShortID     string `json:"shortId"`
 			SpiderX     string `json:"spiderX"`
 		} `json:"realitySettings"`
+		XhttpSettings *XhttpSettingsObject `json:"xhttpSettings,omitempty"`
 	} `json:"streamSettings,omitempty"`
 	Tag string `json:"tag"`
 }
@@ -87,20 +88,31 @@ func (outbound *ClientOutbound) ShareLink(shortId string) url.URL {
 	addQueryIfNonEmpty(&query, "sid", shortId)
 	shareUrl.RawQuery = query.Encode()
 
+	if outbound.StreamSettings != nil {
+		shareUrl.Fragment = "reality-" + outbound.StreamSettings.Network
+	}
+
 	return shareUrl
 }
 
 func (outbound *ClientOutbound) vlessLink() url.URL {
-	// link.Fragment = proxy.Name
 	var link url.URL
 	link.Scheme = "vless"
 	query := link.Query()
+
+	network := ""
+	if outbound.StreamSettings != nil {
+		network = outbound.StreamSettings.Network
+	}
 
 	for _, vnext := range outbound.Settings.Vnext {
 		link.Host = fmt.Sprintf("%s:%d", vnext.Address, vnext.Port)
 		for _, user := range vnext.Users {
 			link.User = url.User(user.Id)
-			addQueryIfNonEmpty(&query, "flow", user.Flow)
+			addQueryIfNonEmpty(&query, "encryption", user.Encryption)
+			if network != "xhttp" {
+				addQueryIfNonEmpty(&query, "flow", user.Flow)
+			}
 		}
 	}
 
@@ -124,12 +136,17 @@ func (outbound *ClientOutbound) addStreamSettingsQueryParamsTo(link *url.URL) {
 
 	query := link.Query()
 
-	addQueryIfNonEmpty(&query, "type", streamSettings.Network)
 	addQueryIfNonEmpty(&query, "security", streamSettings.Security)
-	addQueryIfNonEmpty(&query, "fp", streamSettings.RealitySettings.Fingerprint)
 	addQueryIfNonEmpty(&query, "sni", streamSettings.RealitySettings.ServerName)
+	addQueryIfNonEmpty(&query, "fp", streamSettings.RealitySettings.Fingerprint)
 	addQueryIfNonEmpty(&query, "pbk", streamSettings.RealitySettings.PublicKey)
-	addQueryIfNonEmpty(&query, "spx", streamSettings.RealitySettings.SpiderX)
+	addQueryIfNonEmpty(&query, "type", streamSettings.Network)
+
+	if streamSettings.Network == "xhttp" && streamSettings.XhttpSettings != nil {
+		addQueryIfNonEmpty(&query, "path", streamSettings.XhttpSettings.Path)
+	} else {
+		addQueryIfNonEmpty(&query, "spx", streamSettings.RealitySettings.SpiderX)
+	}
 
 	link.RawQuery = query.Encode()
 }

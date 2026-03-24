@@ -20,7 +20,7 @@ type InboundSettings struct {
 
 type Client struct {
 	Id   string `json:"id"`
-	Flow string `json:"flow"`
+	Flow string `json:"flow,omitempty"`
 
 	// Used to identify client in the `realitySettings.shortIds`.
 	ShortId string `json:"shortId"`
@@ -42,10 +42,15 @@ type RealitySettingsObject struct {
 	ShortIds     []string `json:"shortIds"`
 }
 
+type XhttpSettingsObject struct {
+	Path string `json:"path"`
+}
+
 type StreamSettingsObject struct {
 	Network         string                `json:"network"`
 	Security        string                `json:"security"`
 	RealitySettings RealitySettingsObject `json:"realitySettings"`
+	XhttpSettings   *XhttpSettingsObject  `json:"xhttpSettings,omitempty"`
 }
 
 type SniffingObject struct {
@@ -113,11 +118,15 @@ func (s *ServerConfig) ServerName() string {
 	return s.FirstInbound().StreamSettings.RealitySettings.ServerNames[0]
 }
 
-func NewClient(shortId string, comment string) *Client {
+func NewClient(shortId string, comment string, network string) *Client {
+	flow := "xtls-rprx-vision"
+	if network == "xhttp" {
+		flow = ""
+	}
 	return &Client{
 		Comment: comment,
 		ShortId: shortId,
 		Id:      uuid.New().String(),
-		Flow:    "xtls-rprx-vision",
+		Flow:    flow,
 	}
 }

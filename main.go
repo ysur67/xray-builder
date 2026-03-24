@@ -112,7 +112,7 @@ func Share(osService *linuxService.LinuxOsService, comment string, args *models.
 	}
 
 	clientService := clientservice.New(osService)
-	clientConfig, err := clientService.CreateClientConfig(serverConfig.ServerName(), client, keyPair)
+	clientConfig, err := clientService.CreateClientConfig(serverConfig.ServerName(), client, keyPair, &serverConfig.FirstInbound().StreamSettings)
 	if err != nil {
 		panic(err)
 	}
@@ -169,7 +169,8 @@ func AddClient(osService *linuxService.LinuxOsService, comment string) {
 		log.Fatalln("user already exists")
 	}
 
-	client, err := clientService.CreateClient(comment)
+	network := serverConfig.FirstInbound().StreamSettings.Network
+	client, err := clientService.CreateClient(comment, network)
 	if err != nil {
 		panic(err)
 	}

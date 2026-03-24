@@ -11,19 +11,25 @@ type ClientCfgServiceImpl struct {
 	svc              osservice.OsService
 }
 
-func (b *ClientCfgServiceImpl) CreateClient(comment string) (*models.Client, error) {
+func (b *ClientCfgServiceImpl) CreateClient(comment string, network string) (*models.Client, error) {
 	shortId, err := b.svc.GenerateShortId()
 	if err != nil {
 		return nil, err
 	}
-	return models.NewClient(*shortId, comment), nil
+	return models.NewClient(*shortId, comment, network), nil
 }
 
-func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.Client, keyPair *models.KeyPair) (*models.ClientConfig, error) {
+func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *models.Client, keyPair *models.KeyPair, serverStreamSettings *models.StreamSettingsObject) (*models.ClientConfig, error) {
 	clientConfig := models.ClientConfig{}
 	internal.ReadJson(b.configsDirectory+"/client.template.json", &clientConfig)
 	serverAddr, _ := b.svc.GetServerAddr()
 	first := clientConfig.FirstOutbound()
+
+	flow := "xtls-rprx-vision"
+	if serverStreamSettings.Network == "xhttp" {
+		flow = ""
+	}
+
 	vnext := make([]models.ClientVnext, 1)
 	vnext[0] = models.ClientVnext{
 		Address: serverAddr,
@@ -31,16 +37,24 @@ func (b *ClientCfgServiceImpl) CreateClientConfig(serverName string, client *mod
 		Users: []models.ClientUser{
 			{
 				Id:         client.Id,
-				Flow:       "xtls-rprx-vision",
+				Flow:       flow,
 				Encryption: "none",
 				Comment:    client.Comment,
 			},
 		},
 	}
 	first.Settings.Vnext = vnext
+	first.StreamSettings.Network = serverStreamSettings.Network
 	first.StreamSettings.RealitySettings.ShortID = client.ShortId
 	first.StreamSettings.RealitySettings.ServerName = serverName
 	first.StreamSettings.RealitySettings.PublicKey = keyPair.Pub
+
+	if serverStreamSettings.XhttpSettings != nil {
+		first.StreamSettings.XhttpSettings = &models.XhttpSettingsObject{
+			Path: serverStreamSettings.XhttpSettings.Path,
+		}
+	}
+
 	return &clientConfig, nil
 }
 
